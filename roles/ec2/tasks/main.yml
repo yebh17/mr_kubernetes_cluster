@@ -25,7 +25,6 @@
     key_name: "{{ keypair }}"
     instance_type: "{{ instance_flavour }}"
     image: "{{ ami_id }}"
-    wait: true
     group: "{{ sg_name }}"
     count: 1
     vpc_subnet_id: "{{ subnet_name }}"
@@ -36,6 +35,7 @@
     aws_secret_key: "{{ secret_key }}"
     instance_tags:
       Name: "{{ item }}"
+    wait: yes
   register: ec2
   loop: "{{ instance_tag }}"
 
