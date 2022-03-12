@@ -1,30 +1,10 @@
 ---
 # vars file for ec2
-# instance_tag:
-#         - master
-#         - slave1
-#         - slave2
-
 python_pkgs:
         - boto
         - boto3
-
-# sg_and_regions:
-#         - { sg_name: stockholm_sg,   region_name: eu-north-1 }
-#         - { sg_name: california_sg, region_name: us-west-1 }
-#         - { sg_name: sydney_sg,   region_name: ap-southeast-2 }
 
 launching_vars:
         - { keypair: stockholm, instance_flavour: t3.small, ami_id: ami-0ac001e37d0d00e35, sg_name: stockholm_sg, region_name: eu-north-1, subnet_name: subnet-06b8e4edc7e62a62f, instance_tag: master }
         - { keypair: california, instance_flavour: t2.small, ami_id: ami-0a8a24772b8f01294, sg_name: california_sg, region_name: us-west-1, subnet_name: subnet-01c984d14b9ffdd70, instance_tag: slave1 }
         - { keypair: sydney, instance_flavour: t2.small, ami_id: ami-0646b10ec20a40c81 , sg_name: sydney_sg,   region_name: ap-southeast-2, subnet_name: subnet-078fa88f342d0a850, instance_tag: slave2 }
-
-# sg_name: Allow_All_SG
-# region_name:
-#         - eu-north-1
-#         - us-west-1
-#         - ap-southeast-2
-# subnet_name: subnet-06b8e4edc7e62a62f
-# ami_id: ami-0ac001e37d0d00e35 
-# keypair: ansible
-# instance_flavour: t3.small
