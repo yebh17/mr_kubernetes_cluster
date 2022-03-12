@@ -27,7 +27,8 @@
 - name: Pulling the images of k8s master
   command: kubeadm config images pull
 
-# Reason for using cgroupdriver as 'systemd' instead of default ones, https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/
+# Reason for using cgroupdriver as 'systemd' instead of default ones, 
+# https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/
 - name: Updating Docker cgroup on Master Node
   copy:
     dest: /etc/docker/daemon.json
@@ -41,7 +42,7 @@
     state: restarted
 
 - name: Initializing k8s cluster
-  command: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem
+  command: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem --ignore-preflight-errors=FileContent--proc-sys-net-bridge-bridge-nf-call-iptables
 
 - name: Setting up kubectl on Master Node
   shell:
@@ -49,12 +50,18 @@
       mkdir -p $HOME/.kube
       sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
       sudo chown $(id -u):$(id -g) $HOME/.kube/config
-- name: Deploying Flannel on Master Node
-  command: kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+
+- name: Deploying Calico on Master Node
+  command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
 
 - name: Creating token for Slave
+  # This command is used to get the token for the slave node to join the cluster.
+  # Using “register” the output of the “command” module is stored in a variable called “token”.
+  # Now this token variable contain the command that we need to run on slave node, so that it joins the master node.
   command: kubeadm token create  --print-join-command
   register: token
 
 - name: Cleaning Caches on RAM
+  # “shell” module to clean the buffer cache on the master node,
+  # because while doing the setup it will create lots of temporary data on RAM
   shell: echo 3 > /proc/sys/vm/drop_caches

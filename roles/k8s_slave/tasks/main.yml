@@ -42,10 +42,13 @@
     content: |
       net.bridge.bridge-nf-call-ip6tables = 1
       net.bridge.bridge-nf-call-iptables = 1
+
 - name: Reloading sysctl on Slave Node
   command: sysctl --system
 
 - name: Joining the master node
+  # “hostvars[groups[‘ec2_master’][0]]” option is calling the namespace of the master node from ec2 role.
+  # Next using “[‘token’][‘stdout’]” we just parsed the command that we can use in slave to join the master node
   command: "{{ hostvars[groups['ec2_master'][0]]['token']['stdout'] }}"
 
 - name: Cleaning Caches on RAM
