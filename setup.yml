@@ -1,3 +1,6 @@
+# A script that starts all the roles (ec2 (launching instances), master node and slave nodes)
+
+# Running EC2 Role for lauching instances and assigning them to respective groups
 - hosts: localhost
   gather_facts: no
   vars_files:
@@ -7,6 +10,8 @@
       include_role:
         name: ec2
 
+# Running k8s master role with all required installations, updates, appropriate customizations, networking on master node and prepare
+# for docking slave nodes to master nodes in later process.
 - hosts: ec2_master
   gather_facts: no
   tasks:
@@ -14,6 +19,8 @@
       include_role:
         name: k8s_master
 
+# Running k8s slave role with all required installations, updates, appropriate customizations, networking on slave nodes and dock the
+# slave nodes to our master node.
 - hosts: ec2_slave
   gather_facts: no
   tasks:

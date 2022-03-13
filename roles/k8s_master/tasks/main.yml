@@ -1,5 +1,7 @@
 ---
 # tasks file for k8s_master
+
+# Adding kubernetes repo from base url using gpg keys
 - name: Add kubeadm repositories on Master Node
   yum_repository:
     name: kube
@@ -9,6 +11,7 @@
     gpgcheck: 1
     gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 
+# Installing 'docker', 'kubeadm' and 'iproute-tc' on master node 
 - name: Installing Docker & kubeadm on Master Node
   package:
     name:
@@ -17,6 +20,10 @@
       - iproute-tc
     state: present
 
+# Starting and enabling the docker and kubelet services on master node. we maybe have a question why kubelet is run on master node?
+# The reason for running kubelet on master node is that kubeadm uses containers (pods) to deploy etcd and the api server components. 
+# For this, static manifests are created as yaml-files which are picked up by the kubelet on the master node 
+# to provide the infrastructure pods. An added benefit is that you have the master node metrics available from the kubernetes api.
 - name: Staring & enabling Docker & kubelet on Master Node
   service:
     name: "{{ item }}"
@@ -27,7 +34,7 @@
 - name: Pulling the images of k8s master
   command: kubeadm config images pull
 
-# Reason for using cgroupdriver as 'systemd' instead of default ones, 
+# Updating Docker cgroup on Master Node. Reason for using cgroupdriver as 'systemd' instead of default ones, 
 # https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/
 - name: Updating Docker cgroup on Master Node
   copy:
@@ -36,14 +43,19 @@
       {
       "exec-opts": ["native.cgroupdriver=systemd"]
       }
+# Restart the docker on Master node to get all things activated
 - name: Restart docker on Master Node
   service:
     name: docker
     state: restarted
 
+# Initialize kubernetes cluster with a pod network so that the Pods can talk to each other, also ignoring errors like 'NumCPU', 'Mem'
+# and 'FileContent--proc-sys-net-bridge-bridge-nf-call-iptables' as they are limited to system resources.
 - name: Initializing k8s cluster
   command: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem --ignore-preflight-errors=FileContent--proc-sys-net-bridge-bridge-nf-call-iptables
 
+# Setting kubectl on master node with updating kubernetes configuration from default path to '$HOME/.kube/config' path and updating
+# ownership permissions to user and group 
 - name: Setting up kubectl on Master Node
   shell:
     cmd: |
@@ -51,17 +63,18 @@
       sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
       sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
+# Deploying a CNI plugin on master node, we use 'calico' for it, https://projectcalico.docs.tigera.io/about/about-calico
 - name: Deploying Calico on Master Node
   command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
 
+# A token creation command for slave nodes. This command is used to get the token for the slave node to join the cluster.
+# Using “register” the output of the “command” module is stored in a variable called “token”.
+# Now this token variable contain the command that we need to run on slave node, so that it joins the master node.
 - name: Creating token for Slave
-  # This command is used to get the token for the slave node to join the cluster.
-  # Using “register” the output of the “command” module is stored in a variable called “token”.
-  # Now this token variable contain the command that we need to run on slave node, so that it joins the master node.
   command: kubeadm token create  --print-join-command
   register: token
 
+# Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the master node,
+# because while doing the setup it will create lots of temporary data on RAM
 - name: Cleaning Caches on RAM
-  # “shell” module to clean the buffer cache on the master node,
-  # because while doing the setup it will create lots of temporary data on RAM
   shell: echo 3 > /proc/sys/vm/drop_caches

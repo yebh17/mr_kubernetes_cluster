@@ -1,11 +1,16 @@
 ---
 # tasks file for ec2
+
+# Boto/Boto3 is the Amazon Web Services (AWS) SDK for Python,
+# which allows Python developers to write software that makes use of Amazon services like S3 and EC2. 
+# Boto provides an easy to use, object-oriented API as well as low-level direct service access.
 - name: Installing boto & boto3 on local system
   pip:
     name: "{{ item }}"
     state: present
   loop: "{{ python_pkgs }}"
 
+# Create Security groups in each region for using it for master and slave nodes later
 - name: Creating Security Group for K8s Cluster
   ec2_group:
     name: "{{ item.sg_name }}"
@@ -21,9 +26,10 @@
       cidr_ip: 0.0.0.0/0
   with_items: "{{ launching_vars }}"
 
+# Launching instances (master and one slave node in one region and the remaining slave nodes in other regions)
 - name: Launching three EC2 instances on AWS
   ec2:
-    key_name: "{{ item.keypair }}"
+    key_name: "{{ keypair }}"
     instance_type: "{{ item.instance_flavour }}"
     image: "{{ item.ami_id }}"
     group: "{{ item.sg_name }}"
@@ -40,21 +46,31 @@
   register: ec2
   loop: "{{ launching_vars }}"
 
+# Adding master node to an host group (ec2_master)
 - name: Add 1st instance to host group ec2_master
   add_host:
     hostname: "{{ ec2.results[0].instances[0].public_ip }}"
     groupname: ec2_master
 
+# Adding the first slave node to an host group (ec2_slave)
 - name: Add 2nd instance to host group ec2_slave
   add_host:
     hostname: "{{ ec2.results[1].instances[0].public_ip }}"
     groupname: ec2_slave
 
+# Adding the second slave node to an host group (ec2_slave)
 - name: Add 3rd instance to host group ec2_slave
   add_host:
     hostname: "{{ ec2.results[2].instances[0].public_ip }}"
     groupname: ec2_slave
 
+# Adding the third slave node to an host group (ec2_slave)
+- name: Add 4th instance to host group ec2_slave
+  add_host:
+    hostname: "{{ ec2.results[3].instances[0].public_ip }}"
+    groupname: ec2_slave
+
+# Waiting for the ssh to start on all nodes
 - name: Wait for SSH to come up
   wait_for:
     host: "{{ ec2.results[2].instances[0].public_dns_name }}"

@@ -1,5 +1,7 @@
 ---
 # tasks file for k8s_slave
+
+# Adding kubernetes repo from base url using gpg keys
 - name: Add kubeadm repositories on Slave Node
   yum_repository:
     name: kube
@@ -9,6 +11,7 @@
     gpgcheck: 1
     gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 
+# Installing 'docker', 'kubeadm' and 'iproute-tc' on slave node 
 - name: Installing Docker & kubeadm on Slave Node
   package:
     name:
@@ -17,6 +20,7 @@
       - iproute-tc
     state: present
 
+# Starting and enabling the docker and kubelet services on slave node.
 - name: Staring & enabling Docker & kubelet on Slave Node
   service:
     name: "{{ item }}"
@@ -24,6 +28,8 @@
     enabled: yes
   loop: "{{ service_names }}"
 
+# Updating Docker cgroup on slave Node. Reason for using cgroupdriver as 'systemd' instead of default ones, 
+# https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/
 - name: Updating Docker cgroup on Slave Node
   copy:
     dest: /etc/docker/daemon.json
@@ -31,11 +37,18 @@
       {
       "exec-opts": ["native.cgroupdriver=systemd"]
       }
+
+# Restart the docker on slave node to get all things activated
 - name: Restart Docker on Slave Node
   service:
     name: docker
     state: restarted
 
+# Updating IP tables on Slave Node. Usually in the linux distros like ubuntu,
+# (https://www.kevinhooke.com/2018/11/23/checking-iptables-filtering-for-bridge-networking-on-ubuntu-for-kubernetes-setup/)
+# the bridge module in the kernel for "ip6tables, iptables and arptables" has the default set to "1"
+# ("on", i.e. "*do* send the packets to iptables"), but for the distros like Fedora, RHEL, and CentOS they are set to '0' so we need to
+# update the '/etc/sysctl.d/k8s.conf' to set it to '1'
 - name: Updating IP tables on Slave Node
   copy:
     dest: /etc/sysctl.d/k8s.conf
@@ -43,13 +56,17 @@
       net.bridge.bridge-nf-call-ip6tables = 1
       net.bridge.bridge-nf-call-iptables = 1
 
+# Reloading sysctl on Slave Node to activate the bridge changes
 - name: Reloading sysctl on Slave Node
   command: sysctl --system
 
+# Now this is the crucial part, joining our slave nodes to our master node 
+# “hostvars[groups[‘ec2_master’][0]]” option is calling the namespace of the master node from ec2 role.
+# Next, using “[‘token’][‘stdout’]” we just parse the command that we can use in slave to join the master node
 - name: Joining the master node
-  # “hostvars[groups[‘ec2_master’][0]]” option is calling the namespace of the master node from ec2 role.
-  # Next using “[‘token’][‘stdout’]” we just parsed the command that we can use in slave to join the master node
   command: "{{ hostvars[groups['ec2_master'][0]]['token']['stdout'] }}"
 
+# Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the slave nodes,
+# because while doing the setup it will create lots of temporary data on RAM
 - name: Cleaning Caches on RAM
   shell: echo 3 > /proc/sys/vm/drop_caches

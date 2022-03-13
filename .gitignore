@@ -1,4 +1,3 @@
-stockholm.pem
-california.pem
-sydney.pem
+ansible.pem
+ansible.pub
 cred.yml
