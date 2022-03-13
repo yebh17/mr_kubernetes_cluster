@@ -12,7 +12,7 @@ Requirements,
 
 ## Steps
 
-Follow the following the steps for running a multi-region kubernetes cluster,
+Follow the steps for running a multi-region kubernetes cluster,
 
 -    `git clone git@github.com:yebh17/mr_kubernetes_cluster.git`
 ###### Note: Github deprecated usage of https authentication, so use token authentication.
