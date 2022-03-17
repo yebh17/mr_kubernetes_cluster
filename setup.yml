@@ -3,6 +3,7 @@
 # Running EC2 Role for lauching instances and assigning them to respective groups
 - hosts: localhost
   gather_facts: no
+  become: yes
   vars_files:
         - cred.yml
   tasks:
@@ -14,6 +15,7 @@
 # for docking slave nodes to master nodes in later process.
 - hosts: ec2_master
   gather_facts: no
+  become: yes
   tasks:
     - name: Running K8s Master Role
       include_role:
@@ -23,7 +25,17 @@
 # slave nodes to our master node.
 - hosts: ec2_slave
   gather_facts: no
+  become: yes
   tasks:
     - name: Running K8s Slave Role
       include_role:
         name: k8s_slave
+
+# Run vpn server
+- hosts: ec2_vpn
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Running K8s VPN Role
+      include_role:
+        name: k8s_vpn

@@ -21,13 +21,17 @@
     rules:
     - proto: all
       cidr_ip: 0.0.0.0/0
+    - proto: udp
+      from_port: 51820
+      to_port: 51820
+      cidr_ip: 0.0.0.0/0
     rules_egress:
     - proto: all
       cidr_ip: 0.0.0.0/0
   with_items: "{{ launching_vars }}"
 
 # Launching instances (master and one slave node in one region and the remaining slave nodes in other regions)
-- name: Launching three EC2 instances on AWS
+- name: Launching four EC2 instances on AWS
   ec2:
     key_name: "{{ keypair }}"
     instance_type: "{{ item.instance_flavour }}"
@@ -52,7 +56,7 @@
     hostname: "{{ ec2.results[0].instances[0].public_ip }}"
     groupname: ec2_master
 
-# Adding the first slave node to an host group (ec2_slave)
+# Adding the second slave node to an host group (ec2_slave)
 - name: Add 2nd instance to host group ec2_slave
   add_host:
     hostname: "{{ ec2.results[1].instances[0].public_ip }}"
@@ -69,6 +73,12 @@
   add_host:
     hostname: "{{ ec2.results[3].instances[0].public_ip }}"
     groupname: ec2_slave
+
+# Adding a VPN instance to an host group (ec2_vpn)
+- name: Add a vpn instance to host group ec2_vpn
+  add_host:
+    hostname: "{{ ec2.results[4].instances[0].public_ip }}"
+    groupname: ec2_vpn
 
 # Waiting for the ssh to start on all nodes
 - name: Wait for SSH to come up

@@ -2,31 +2,48 @@
 # tasks file for k8s_slave
 
 # Adding kubernetes repo from base url using gpg keys
-- name: Add kubeadm repositories on Slave Node
-  yum_repository:
-    name: kube
-    description: Kubernetes repo
-    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-$basearch
-    enabled: 1
-    gpgcheck: 1
-    gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+- name: install APT Transport HTTPS
+  apt:
+    name: apt-transport-https
+    state: present
+ 
+- name: add Kubernetes apt-key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+ 
+- name: add Kubernetes' APT repository
+  apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+    filename: 'kubernetes'
 
 # Installing 'docker', 'kubeadm' and 'iproute-tc' on slave node 
 - name: Installing Docker & kubeadm on Slave Node
   package:
     name:
-      - docker
       - kubeadm
-      - iproute-tc
+      - iproute2
     state: present
 
-# Starting and enabling the docker and kubelet services on slave node.
+# Starting and enabling the docker on master node.
+- name: enabling Docker on Master Node
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: ensure docker registry is available
+  apt_repository: repo='deb https://download.docker.com/linux/ubuntu bionic stable' state=present
+
+- name: ensure docker and dependencies are installed
+  apt: name=docker-ce update_cache=yes
+  
+# Starting kubelet services on slave node.
 - name: Staring & enabling Docker & kubelet on Slave Node
   service:
-    name: "{{ item }}"
+    name: kubelet
     state: started
     enabled: yes
-  loop: "{{ service_names }}"
 
 # Updating Docker cgroup on slave Node. Reason for using cgroupdriver as 'systemd' instead of default ones, 
 # https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/
@@ -63,8 +80,26 @@
 # Now this is the crucial part, joining our slave nodes to our master node 
 # “hostvars[groups[‘ec2_master’][0]]” option is calling the namespace of the master node from ec2 role.
 # Next, using “[‘token’][‘stdout’]” we just parse the command that we can use in slave to join the master node
-- name: Joining the master node
-  command: "{{ hostvars[groups['ec2_master'][0]]['token']['stdout'] }}"
+# - name: Joining the master node
+#   command: "{{ hostvars[groups['ec2_master'][0]]['token']['stdout'] }}"
+
+- name: install wireguard client
+  apt:
+    name: wireguard
+    state: present
+    update_cache: yes
+
+- name: generate public and private key
+  shell:
+    cmd: umask 077 && wg genkey | sudo tee /etc/wireguard/privatekey | wg pubkey | sudo tee /etc/wireguard/publickey
+
+- name: create client wireguard config
+  template:
+    dest: /etc/wireguard/wg0.conf
+    src: roles/k8s_slave/templates/wg0.conf.j2
+    owner: root
+    group: root
+    mode: '0600'
 
 # Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the slave nodes,
 # because while doing the setup it will create lots of temporary data on RAM

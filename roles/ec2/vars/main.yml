@@ -8,7 +8,9 @@ python_pkgs:
 keypair: ansible
 
 launching_vars:
-        - { instance_flavour: t3.small, ami_id: ami-0ac001e37d0d00e35, sg_name: stockholm_sg, region_name: eu-north-1, subnet_name: subnet-06b8e4edc7e62a62f, instance_tag: master }
-        - { instance_flavour: t3.small, ami_id: ami-0ac001e37d0d00e35, sg_name: stockholm_sg, region_name: eu-north-1, subnet_name: subnet-06b8e4edc7e62a62f, instance_tag: slave1 }
-        - { instance_flavour: t2.small, ami_id: ami-0a8a24772b8f01294, sg_name: california_sg, region_name: us-west-1, subnet_name: subnet-01c984d14b9ffdd70, instance_tag: slave2 }
-        - { instance_flavour: t2.small, ami_id: ami-0646b10ec20a40c81 , sg_name: sydney_sg, region_name: ap-southeast-2, subnet_name: subnet-078fa88f342d0a850, instance_tag: slave3 }
+        - { instance_flavour: t3.small, ami_id: ami-05760f62e0b3eab56, sg_name: stockholm_sg, region_name: eu-north-1, subnet_name: subnet-06b8e4edc7e62a62f, instance_tag: master }
+        - { instance_flavour: t3.small, ami_id: ami-05760f62e0b3eab56, sg_name: stockholm_sg, region_name: eu-north-1, subnet_name: subnet-06b8e4edc7e62a62f, instance_tag: slave1 }
+        - { instance_flavour: t2.small, ami_id: ami-009726b835c24a3aa, sg_name: california_sg, region_name: us-west-1, subnet_name: subnet-01c984d14b9ffdd70, instance_tag: slave2 }
+        - { instance_flavour: t2.small, ami_id: ami-05654370f5b5eb0b0, sg_name: sydney_sg, region_name: ap-southeast-2, subnet_name: subnet-078fa88f342d0a850, instance_tag: slave3 }
+        - { instance_flavour: t3.small, ami_id: ami-05760f62e0b3eab56, sg_name: vpn_sg, region_name: eu-north-1, subnet_name: subnet-06b8e4edc7e62a62f, instance_tag: vpn-server }
+        
