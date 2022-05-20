@@ -61,6 +61,27 @@
     name: docker
     state: restarted
 
+# Set the hostname as FQDN 
+- name: Set the hostname as FQDN 
+  shell: hostnamectl set-hostname $(curl http://169.254.169.254/latest/meta-data/local-hostname)
+
+# Check hostname
+- name: Check hostname
+  shell: hostname
+  register: hostname_output
+- debug:
+    var: hostname_output.stdout_lines
+
+# Create a /etc/kubernetes/aws.yml file
+# - name: Create a /etc/kubernetes/node(1-3).yml file(s)
+#   shell: mkdir -p /etc/kubernetes/node1.yml /etc/kubernetes/node2.yml /etc/kubernetes/node3.yml
+
+# Copy node.yml templates to /etc/kubernetes/node.yml file
+#- name: Copy node.yml templates to /etc/kubernetes/node.yml file
+#  copy: src={{ item.src }} dest={{ item.dest }}
+#  with_items:
+#    - { src: 'roles/k8s_slave/templates/node.yml.j2', dest: '/etc/kubernetes/node.yml' }
+
 # Updating IP tables on Slave Node. Usually in the linux distros like ubuntu,
 # (https://www.kevinhooke.com/2018/11/23/checking-iptables-filtering-for-bridge-networking-on-ubuntu-for-kubernetes-setup/)
 # the bridge module in the kernel for "ip6tables, iptables and arptables" has the default set to "1"
@@ -83,23 +104,21 @@
 # - name: Joining the master node
 #   command: "{{ hostvars[groups['ec2_master'][0]]['token']['stdout'] }}"
 
-- name: install wireguard client
+- name: install openvpn client
   apt:
-    name: wireguard
+    name: openvpn
     state: present
-    update_cache: yes
 
-- name: generate public and private key
-  shell:
-    cmd: umask 077 && wg genkey | sudo tee /etc/wireguard/privatekey | wg pubkey | sudo tee /etc/wireguard/publickey
-
-- name: create client wireguard config
-  template:
-    dest: /etc/wireguard/wg0.conf
-    src: roles/k8s_slave/templates/wg0.conf.j2
-    owner: root
-    group: root
-    mode: '0600'
+- name: install network-manager-openvpn client
+  apt:
+    name: network-manager-openvpn
+    state: present
+  
+- name: Start openvpn client service
+  command: systemctl start openvpn
+ 
+- name: Enable openvpn client service
+  command: systemctl enable openvpn
 
 # Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the slave nodes,
 # because while doing the setup it will create lots of temporary data on RAM

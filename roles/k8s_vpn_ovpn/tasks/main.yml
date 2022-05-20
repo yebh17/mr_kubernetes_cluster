@@ -1,0 +1,10 @@
+---
+# tasks file for k8s_vpn
+
+# Installing Openvpn
+
+- name: Download openvpn installer script
+  command: curl -O https://raw.githubusercontent.com/angristan/openvpn-install/master/openvpn-install.sh
+
+- name: Update to executable permissions to the script
+  command: chmod +x openvpn-install.sh

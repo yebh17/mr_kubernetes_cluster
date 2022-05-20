@@ -1,0 +1,50 @@
+#!/bin/bash
+
+make_request () {
+    local url=$1
+    http_status=$(curl -s -o /dev/null --write-out %{http_code} --silent --output monitoring_scripts/tmp/output.log $url)
+    if [[ "$http_status" -ne 200 ]] ; then
+        curl \
+        --silent \
+        --output monitoring_scripts/tmp/output.log \
+        >> monitoring_scripts/tmp/errors.log \
+        "$url"
+    else
+        curl \
+        --write-out "%{http_code} | %{time_total} |" \
+        --silent \
+        --output monitoring_scripts/tmp/output.log \
+        >> monitoring_scripts/tmp/tmp_metrics.log \
+        "$url"
+
+        curl --silent "$url" | grep -o 'web[^;]*' >> monitoring_scripts/tmp/tmp_metrics.log
+    fi
+}
+
+main () {
+    [ -d "monitoring_scripts/tmp" ] && echo "tmp directory already exists" || mkdir monitoring_scripts/tmp
+    local url=$1
+    if [[ -z "$url" ]]; then
+        echo "ERROR:
+        An URL must be provided.
+        Usage: check-res <url>
+        Aborting.
+        "
+        exit 1
+    fi
+    echo "REMOVING METRICS LOG FILE"
+    rm -rf monitoring_scripts/tmp/tmp_metrics.log && rm -rf monitoring_scripts/tmp/metrics.log
+    echo "REMOVING ERRORS LOG FILE"
+    rm -rf monitoring_scripts/tmp/errors.log
+    echo "RESPONSE_CODE | TIME_TOTAL(s)" >> monitoring_scripts/tmp/tmp_metrics.log
+    echo "RESPONSE_CODE | TIME_TOTAL(s)" >> monitoring_scripts/tmp/errors.log
+    for i in {1..20}; do
+        make_request $url
+    done
+    #sed 's/|/\n/2; P; D' tmp/tmp_metrics.log > tmp/metrics.log
+
+    #rm -rf tmp/tmp_metrics.log
+    rm -rf monitoring_scripts/tmp/output.log
+}
+
+main "$@"

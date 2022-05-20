@@ -35,6 +35,9 @@ Follow the steps for running a multi-region kubernetes cluster,
 
 -    Add your AWS account access_key and secret_key in the VI editor and save it
 
--   `sudo ansible-playbook setup.yml --ask-vault-pass`
+-   `./wrapper [-w] [-o] [-z] [-t] [-s]`
+-   '-w' : Wireguard, '-o' : OpenVPN, '-z' : ZeroTier, '-t' : Tinc, '-s' : SoftEther
 
-Now this will do all the magic!
+-   `monitoring_scripts/monitoring https://kubernetes.bharanikumar.org/`
+
+-   Now you can check logs in "monitoring_scripts/tmp/tmp_metrics.log" file

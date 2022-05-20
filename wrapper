@@ -1,0 +1,50 @@
+#!/bin/bash
+
+wireguard () {
+    sudo ansible-playbook setup_wg.yml --ask-vault-pass
+}
+
+openvpn() {
+    sudo ansible-playbook setup_ovpn.yml --ask-vault-pass
+}
+
+zerotier () {
+    sudo ansible-playbook setup_zerotier.yml --ask-vault-pass
+}
+
+tinc() {
+    sudo ansible-playbook setup_tinc.yml --ask-vault-pass
+}
+
+softether () {
+    sudo ansible-playbook setup_softether.yml --ask-vault-pass
+}
+
+main() {
+    while getopts 'wo' OPTION; do
+    case "$OPTION" in
+    w)
+        wireguard
+        ;;
+    o)
+        openvpn
+        ;;
+    z)
+        zerotier
+        ;;
+    t)
+        tinc
+        ;;
+    s)
+        softether
+        ;;
+    ?)
+      echo "script usage: $(basename $0) [-w] [-o] [-z] [-t] [-s]" >&2
+      exit 1
+      ;;
+    esac
+    done
+    shift "$(($OPTIND -1))"
+}
+
+main "$@"

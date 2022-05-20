@@ -48,6 +48,14 @@
     state: started
     enabled: yes
 
+# Work around for the issue (level=fatal msg="pulling image: rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.ImageService")
+- name: Workarund - Delete /etc/containerd/config.toml
+  command: rm /etc/containerd/config.toml
+
+# Work around for the issue (level=fatal msg="pulling image: rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.ImageService")
+- name: Workarund - Restart containerd
+  command: systemctl restart containerd
+
 # Pulling all the images required for k8s master on master node.
 - name: Pulling the images of k8s master
   command: kubeadm config images pull
@@ -67,10 +75,37 @@
     name: docker
     state: restarted
 
+# Set the hostname as FQDN 
+- name: Set the hostname as FQDN 
+  shell: hostnamectl set-hostname $(curl http://169.254.169.254/latest/meta-data/local-hostname)
+
+# Check hostname
+- name: Check hostname
+  shell: hostname
+  register: hostname_output
+- debug:
+    var: hostname_output.stdout_lines
+
+# Create kubernetes directory for all kubernetes related files
+- name: Create kubernetes directory for all kubernetes related files
+  shell: mkdir -p $HOME/kubernetes
+
+# Copy service.yml template to /etc/kubernetes/service.yml file
+- name: Copy service.yml template to /etc/kubernetes/aws.yml file
+  template:
+    dest: /etc/kubernetes/service.yml
+    src: roles/k8s_master_wg/templates/service.yml.j2
+
+# Copy deployment.yml file for deployment and service running on kubernetes
+- name: Create a $HOME/kubernetes/deployment.yml files
+  template:
+    dest: $HOME/kubernetes/deployment.yml
+    src: roles/k8s_master_wg/templates/deployment.yml.j2
+
 # Initialize kubernetes cluster with a pod network so that the Pods can talk to each other, also ignoring errors like 'NumCPU', 'Mem'
 # and 'FileContent--proc-sys-net-bridge-bridge-nf-call-iptables' as they are limited to system resources.
 - name: Initializing k8s cluster
-  command: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem --ignore-preflight-errors=FileContent--proc-sys-net-bridge-bridge-nf-call-iptables
+  command: kubeadm init --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem --ignore-preflight-errors=FileContent--proc-sys-net-bridge-bridge-nf-call-iptables
 
 # Setting kubectl on master node with updating kubernetes configuration from default path to '$HOME/.kube/config' path and updating
 # ownership permissions to user and group 
@@ -83,7 +118,7 @@
 
 # Deploying a CNI plugin on master node, we use 'calico' for it, https://projectcalico.docs.tigera.io/about/about-calico
 - name: Deploying Calico on Master Node
-  command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+  command: kubectl apply -f https://projectcalico.docs.tigera.io/archive/v3.21/manifests/calico.yaml
 
 # A token creation command for slave nodes. This command is used to get the token for the slave node to join the cluster.
 # Using “register” the output of the “command” module is stored in a variable called “token”.
@@ -105,7 +140,7 @@
 - name: create client wireguard config
   template:
     dest: /etc/wireguard/wg0.conf
-    src: roles/k8s_master/templates/wg0.conf.j2
+    src: roles/k8s_master_wg/templates/wg0.conf.j2
     owner: root
     group: root
     mode: '0600'

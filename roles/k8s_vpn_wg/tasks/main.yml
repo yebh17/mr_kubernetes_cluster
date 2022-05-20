@@ -15,7 +15,7 @@
 - name: create server wireguard config
   template:
     dest: /etc/wireguard/wg0.conf
-    src: roles/k8s_vpn/templates/wg0.conf.j2
+    src: roles/k8s_vpn_wg/templates/wg0.conf.j2
     owner: root
     group: root
     mode: '0600'
