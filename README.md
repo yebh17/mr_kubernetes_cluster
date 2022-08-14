@@ -22,7 +22,7 @@ Follow the steps for running a multi-region kubernetes cluster,
 -    Go to your AWS account and create keypair in a desired AWS region (I choose where my master will be deployed) and download it with .pem extension to the root of this project.
 
 -    `chmod 400 <your-keypair-name>.pem`
--    `ssh-keygen -y -f <your-keypair-name>.pem > <your-new-public-keypair-name>.pub`
+-    `ssh-keygen -y -f <your-keypair-name>.pem > <give-your-new-public-keypair-name>.pub`
 
 -    Go to your AWS account and go to the desired different region where you wanted to run other slave nodes and go to AWS keypairs section and click on import keypairs and provide your private key name and import your newly created public keypair with .pub extension and thus you will be having the same private keys in all the regions (In this project we will be using 'eu-north-1' for one master and one slave node, and then 'us-west1', 'ap-southeast-1' for one slave node each)
 
@@ -33,7 +33,7 @@ Follow the steps for running a multi-region kubernetes cluster,
 -    `sudo apt-get install python3.6`
 -    `ansible-vault create cred.yml`
 
--    Add your AWS account access_key and secret_key in the VI editor and save it
+-    Add your AWS account access_key and secret_key in the VI editor as, ACCESS_KEY_ID: <YOUR-ACCESS-KEY-ID> and SECRET_ACCESS_KEY: <YOUR-SECRET-ACCESS-KEY> one after the other and save it
 
 -   `sudo ansible-playbook setup.yml --ask-vault-pass`
 
