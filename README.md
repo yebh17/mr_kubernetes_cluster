@@ -35,6 +35,10 @@ Follow the steps for running a multi-region kubernetes cluster,
 
 -    Add your AWS account access_key and secret_key in the VI editor as, access_key: <YOUR-ACCESS-KEY-ID> and secret_key: <YOUR-SECRET-ACCESS-KEY> one after the other and save it
 
--   `sudo ansible-playbook setup.yml --ask-vault-pass`
+-   `sudo ansible-playbook setup_<vpn-name(wg/ovpn/softether/tinc/zerotier)>.yml --ask-vault-pass`
 
 Now this will do all the magic!
+
+-   Now if you would like to delete the instances, you can give the below command,
+
+-   `sudo ansible-playbook delete.yml --ask-vault-pass`

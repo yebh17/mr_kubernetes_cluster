@@ -19,7 +19,7 @@
   tasks:
     - name: Running K8s Master Role
       include_role:
-        name: k8s_master
+        name: k8s_master_softether
 
 # Running k8s slave role with all required installations, updates, appropriate customizations, networking on slave nodes and dock the
 # slave nodes to our master node.
@@ -29,13 +29,13 @@
   tasks:
     - name: Running K8s Slave Role
       include_role:
-        name: k8s_slave
+        name: k8s_slave_softether
 
-# Run vpn server
-# - hosts: ec2_vpn
-#   gather_facts: no
-#   become: yes
-#   tasks:
-#     - name: Running K8s VPN Role
-#       include_role:
-#         name: k8s_vpn
+#Run vpn server
+- hosts: ec2_vpn
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Running K8s VPN Role
+      include_role:
+        name: k8s_vpn_softether

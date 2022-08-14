@@ -74,7 +74,7 @@
     hostname: "{{ ec2.results[3].instances[0].public_ip }}"
     groupname: ec2_slave
 
-# Adding a VPN instance to an host group (ec2_vpn)
+#Adding a VPN instance to an host group (ec2_vpn)
 - name: Add a vpn instance to host group ec2_vpn
   add_host:
     hostname: "{{ ec2.results[4].instances[0].public_ip }}"
