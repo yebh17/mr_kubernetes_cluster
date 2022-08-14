@@ -33,7 +33,7 @@ Follow the steps for running a multi-region kubernetes cluster,
 -    `sudo apt-get install python3.6`
 -    `ansible-vault create cred.yml`
 
--    Add your AWS account access_key and secret_key in the VI editor as, ACCESS_KEY_ID: <YOUR-ACCESS-KEY-ID> and SECRET_ACCESS_KEY: <YOUR-SECRET-ACCESS-KEY> one after the other and save it
+-    Add your AWS account access_key and secret_key in the VI editor as, access_key: <YOUR-ACCESS-KEY-ID> and secret_key: <YOUR-SECRET-ACCESS-KEY> one after the other and save it
 
 -   `sudo ansible-playbook setup.yml --ask-vault-pass`
 
