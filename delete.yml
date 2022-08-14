@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  gather_facts: no
+  become: yes
+  vars_files:
+        - cred.yml
+  tasks:
+    - name: Delete ec2 instances
+      include_role:
+        name: ec2_delete

@@ -1,0 +1,13 @@
+---
+
+- name: Delete EC2 instances
+  community.aws.ec2_instance:
+    region: "{{ item.region_name }}"
+    aws_access_key: "{{ access_key }}"
+    aws_secret_key: "{{ secret_key }}"
+    state: absent
+    filters:
+      instance-state-name: running
+      "tag:Name": "{{ item.instance_tag }}"
+  with_items: "{{ launching_vars }}"
+  loop: "{{ launching_vars }}"
