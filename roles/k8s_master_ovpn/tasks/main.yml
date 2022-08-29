@@ -48,6 +48,12 @@
     state: started
     enabled: yes
 
+- name: Workaround for running kubeadm
+  shell:
+    cmd: |
+      rm /etc/containerd/config.toml
+      systemctl restart containerd
+
 # Pulling all the images required for k8s master on master node.
 - name: Pulling the images of k8s master
   command: kubeadm config images pull
@@ -69,21 +75,43 @@
 
 # Initialize kubernetes cluster with a pod network so that the Pods can talk to each other, also ignoring errors like 'NumCPU', 'Mem'
 # and 'FileContent--proc-sys-net-bridge-bridge-nf-call-iptables' as they are limited to system resources.
-- name: Initializing k8s cluster
-  command: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem --ignore-preflight-errors=FileContent--proc-sys-net-bridge-bridge-nf-call-iptables
-
+- name: initialize the cluster
+  shell: kubeadm init --pod-network-cidr=10.244.0.0/16
+  args:
+    chdir: $HOME
+    # creates: cluster_initialized.txt
 # Setting kubectl on master node with updating kubernetes configuration from default path to '$HOME/.kube/config' path and updating
-# ownership permissions to user and group 
-- name: Setting up kubectl on Master Node
-  shell:
-    cmd: |
-      mkdir -p $HOME/.kube
-      sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-      sudo chown $(id -u):$(id -g) $HOME/.kube/config
+# ownership permissions to user and group.
+- name: create .kube directory
+  become: yes
+  become_user: ubuntu
+  file:
+    path: $HOME/.kube
+    state: directory
+    mode: 0755
+
+- name: copies admin.conf to user's kube config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/ubuntu/.kube/config
+    remote_src: yes
+    owner: ubuntu
+
+- name: Pause for 1 minute to run calico
+  ansible.builtin.pause:
+    minutes: 1
 
 # Deploying a CNI plugin on master node, we use 'calico' for it, https://projectcalico.docs.tigera.io/about/about-calico
-- name: Deploying Calico on Master Node
-  command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+- name: install Pod network
+  become: yes
+  become_user: ubuntu
+  shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.0/manifests/calico.yaml 
+  args:
+    chdir: $HOME
+  register: calico_debug
+
+- debug:
+      msg: "{{ calico_debug.stdout }}"
 
 # A token creation command for slave nodes. This command is used to get the token for the slave node to join the cluster.
 # Using “register” the output of the “command” module is stored in a variable called “token”.
