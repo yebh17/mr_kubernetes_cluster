@@ -77,6 +77,46 @@
 - name: Reloading sysctl on Slave Node
   command: sysctl --system
 
+#  Add universe repo
+- name: add universe repo
+  become: yes
+  become_user: root
+  expect:
+    command: "apt-add-repository universe"
+    responses:
+      'Press \[ENTER\] to continue or Ctrl\-c to cancel\.': ''
+
+# Package update
+- name: apt update
+  become: yes
+  become_user: root
+  command: "apt update"
+
+#Python installation
+- name: install python2.7
+  become: yes
+  become_user: root
+  expect:
+    command: "apt install python2-minimal"
+    responses:
+        'Do you want to continue\? \[Y\/n\]': 'y'
+
+# Install ovpn
+- name: "Installing OpenVPN"
+  apt: name={{item}} state=present
+  with_items:
+    - openvpn
+
+# Configure client ovpn
+- name: "Configure client ovpn"
+  template:
+    src: client.ovpn
+    dest: "/root/"
+
+# connect slaves to open vpn network
+# - name: connect slaves to open vpn network
+#   command: "openvpn --config client.ovpn"
+
 # Now this is the crucial part, joining our slave nodes to our master node 
 # “hostvars[groups[‘ec2_master’][0]]” option is calling the namespace of the master node from ec2 role.
 # Next, using “[‘token’][‘stdout’]” we just parse the command that we can use in slave to join the master node

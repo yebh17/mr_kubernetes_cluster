@@ -11,6 +11,15 @@
       include_role:
         name: ec2
 
+#Run vpn server
+- hosts: ec2_vpn
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Running K8s VPN Role
+      include_role:
+        name: k8s_vpn_ovpn
+
 # Running k8s master role with all required installations, updates, appropriate customizations, networking on master node and prepare
 # for docking slave nodes to master nodes in later process.
 - hosts: ec2_master
@@ -30,12 +39,3 @@
     - name: Running K8s Slave Role
       include_role:
         name: k8s_slave_ovpn
-
-#Run vpn server
-- hosts: ec2_vpn
-  gather_facts: no
-  become: yes
-  tasks:
-    - name: Running K8s VPN Role
-      include_role:
-        name: k8s_vpn_ovpn

@@ -269,16 +269,14 @@
     - clientconfig
 
 - name: "Fetch public IP address"
-  shell: wget -qO- http://ipecho.net/plain ; echo
+  shell: curl http://ipinfo.io/ip
   register: host_ip
 
-- name: "Setting public IP address"
-  lineinfile: 
+- name: Replace file name dh2048.pem to dh.pem in the config file
+  ansible.builtin.replace:
     path: ~/client-configs/base.conf
-    regexp: 'remote\s+\w+\s+1194' 
-    line: "remote {{ host_ip }} 1194"
-  tags:
-    - clientconfigip
+    regexp: 'remote my-server-1 1194'
+    replace: 'remote {{ host_ip.stdout }} 1194'
 
 - debug:
     msg: "{{ host_ip }}" 
@@ -356,11 +354,19 @@
   tags:
     - clientfile
 
-- name: "Get client OpenVPN file"
+- name: "Get client OpenVPN file to master"
   fetch:
     src: /root/client-configs/files/client.ovpn
-    dest: ./
+    dest: ./roles/k8s_master_ovpn/templates/
     flat: yes
   tags:
-    - getvpnfile 
+    - getvpnfile_master
+
+- name: "Get client OpenVPN file to slaves"
+  fetch:
+    src: /root/client-configs/files/client.ovpn
+    dest: ./roles/k8s_slave_ovpn/templates/
+    flat: yes
+  tags:
+    - getvpnfile_slaves
 

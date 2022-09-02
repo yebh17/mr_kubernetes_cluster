@@ -8,9 +8,9 @@ python_pkgs:
 keypair: ansible
 
 launching_vars:
+        - { instance_flavour: t3.small, ami_id: ami-0440e5026412ff23f, sg_name: vpn_sg, region_name: eu-north-1, subnet_name: subnet-0e45734fe56930718, instance_tag: vpn-server }
         - { instance_flavour: t3.small, ami_id: ami-0440e5026412ff23f, sg_name: stockholm_sg, region_name: eu-north-1, subnet_name: subnet-0e45734fe56930718, instance_tag: master }
         - { instance_flavour: t3.small, ami_id: ami-0440e5026412ff23f, sg_name: stockholm_sg, region_name: eu-north-1, subnet_name: subnet-0e45734fe56930718, instance_tag: slave1 }
-        - { instance_flavour: t3.small, ami_id: ami-0440e5026412ff23f, sg_name: vpn_sg, region_name: eu-north-1, subnet_name: subnet-0e45734fe56930718, instance_tag: vpn-server }
         - { instance_flavour: t2.small, ami_id: ami-085284d24fe829cd0, sg_name: california_sg, region_name: us-west-1, subnet_name: subnet-0ab84587aa66479f4, instance_tag: slave2 }
         - { instance_flavour: t2.small, ami_id: ami-0e040c48614ad1327, sg_name: sydney_sg, region_name: ap-southeast-2, subnet_name: subnet-0b4d6325185215a34, instance_tag: slave3 }
         

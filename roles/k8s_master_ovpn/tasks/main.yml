@@ -120,6 +120,46 @@
 #   command: kubeadm token create  --print-join-command
 #   register: token
 
+#  Add universe repo
+- name: add universe repo
+  become: yes
+  become_user: root
+  expect:
+    command: "apt-add-repository universe"
+    responses:
+      'Press \[ENTER\] to continue or Ctrl\-c to cancel\.': ''
+
+# Package update
+- name: apt update
+  become: yes
+  become_user: root
+  command: "apt update"
+
+#Python installation
+- name: install python2.7
+  become: yes
+  become_user: root
+  expect:
+    command: "apt install python2-minimal"
+    responses:
+        'Do you want to continue\? \[Y\/n\]': 'y'
+
+# Install ovpn
+- name: "Installing OpenVPN"
+  apt: name={{item}} state=present
+  with_items:
+    - openvpn
+
+# Configure client ovpn
+- name: "Configure client ovpn"
+  template:
+    src: client.ovpn
+    dest: "/root/"
+
+# connect slaves to open vpn network
+# - name: connect slaves to open vpn network
+#   command: "openvpn --config client.ovpn"
+
 # Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the master node,
 # because while doing the setup it will create lots of temporary data on RAM
 - name: Cleaning Caches on RAM

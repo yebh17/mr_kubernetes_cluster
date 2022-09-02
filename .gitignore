@@ -1,3 +1,5 @@
 ansible.pem
 ansible.pub
 cred.yml
+roles/k8s_master_ovpn/templates/client.ovpn
+roles/k8s_slave_ovpn/templates/client.ovpn
