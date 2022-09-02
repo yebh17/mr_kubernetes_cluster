@@ -1,2 +1,29 @@
 ---
 # vars file for k8s_vpn
+
+easyrsa_version: "3.0.1"
+easyrsa_dest: "/usr/share/easy-rsa"
+
+easyrsa_dn: "cn_only"
+easyrsa_req_country: "EU"
+easyrsa_req_province: "Sweden"
+easyrsa_req_city: "Gothenburg"
+easyrsa_req_org: "Copyleft Certificate Co"
+easyrsa_req_email: "yedlabharani@gmail.com"
+easyrsa_req_ou: "Home"
+
+easyrsa_keysize: 2048
+easyrsa_digest: "sha256"
+
+easyrsa_clients:
+  - name: client1
+
+easyrsa_certs:
+  - dh.pem
+  - server.crt
+  - ca.crt
+  - client1.crt
+  - ta.key
+  - server.key
+  - ca.key
+  - client1.key
