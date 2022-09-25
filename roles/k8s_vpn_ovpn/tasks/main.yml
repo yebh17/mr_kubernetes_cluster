@@ -1,28 +1,12 @@
 ---
 # tasks file for k8s_vpn
 
+- name: Install net-tools for network management
+  apt:
+    name: net-tools
+    state: present
+
 # Installing ovpn
-
-- name: add universe repo
-  become: yes
-  become_user: root
-  expect:
-    command: "apt-add-repository universe"
-    responses:
-      'Press \[ENTER\] to continue or Ctrl\-c to cancel\.': ''
-
-- name: apt update
-  become: yes
-  become_user: root
-  command: "apt update"
-
-- name: install python2.7
-  become: yes
-  become_user: root
-  expect:
-    command: "apt install python2-minimal"
-    responses:
-        'Do you want to continue\? \[Y\/n\]': 'y'
 
 - name: "Installing OpenVPN"
   apt: name={{item}} state=present
@@ -228,6 +212,10 @@
   tags:
     - firewallconfig
 
+- name: "Get the interface name"
+  shell: ip -o -4 route show to default | cut -d " " -f 5
+  register: iface
+
 - name: Masquerade traffic from VPN
   blockinfile:
     path: /etc/ufw/before.rules
@@ -237,7 +225,7 @@
       *nat
       :POSTROUTING ACCEPT [0:0] 
       # Allow traffic from OpenVPN client  (change to the interface you discovered!)
-      -A POSTROUTING -o ens5 -j MASQUERADE
+      -A POSTROUTING -o {{ iface.stdout }} -j MASQUERADE
       COMMIT
       # END OPENVPN RULES
   tags:
@@ -247,6 +235,11 @@
   shell: ufw disable && ufw --force enable
   tags:
     - firewallconfig
+
+- name: "Insert a line at the end of a file for producing dynamic ips for clients"
+  lineinfile:
+    path: /etc/openvpn/server.conf
+    line: duplicate-cn
 
 - name: "Start OpenVPN"
   shell: systemctl start openvpn@server && systemctl enable openvpn@server 

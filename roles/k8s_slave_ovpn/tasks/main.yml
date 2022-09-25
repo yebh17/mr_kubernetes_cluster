@@ -1,6 +1,11 @@
 ---
 # tasks file for k8s_slave
 
+- name: Install net-tools for network management
+  apt:
+    name: net-tools
+    state: present
+
 # Adding kubernetes repo from base url using gpg keys
 - name: install APT Transport HTTPS
   apt:
@@ -77,30 +82,6 @@
 - name: Reloading sysctl on Slave Node
   command: sysctl --system
 
-#  Add universe repo
-- name: add universe repo
-  become: yes
-  become_user: root
-  expect:
-    command: "apt-add-repository universe"
-    responses:
-      'Press \[ENTER\] to continue or Ctrl\-c to cancel\.': ''
-
-# Package update
-- name: apt update
-  become: yes
-  become_user: root
-  command: "apt update"
-
-#Python installation
-- name: install python2.7
-  become: yes
-  become_user: root
-  expect:
-    command: "apt install python2-minimal"
-    responses:
-        'Do you want to continue\? \[Y\/n\]': 'y'
-
 # Install ovpn
 - name: "Installing OpenVPN"
   apt: name={{item}} state=present
@@ -113,9 +94,22 @@
     src: client.ovpn
     dest: "/root/"
 
+- name: Get node name
+  shell: curl http://169.254.169.254/latest/meta-data/local-hostname
+  register: hostname
+
+- name: Get the vps gateway ip 
+  shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
+  register: private_ip
+
+- name: Arrange route for ssh to access via primary interface
+  shell: "route add -host 213.112.64.208 gw {{ private_ip.stdout }}"
+
 # connect slaves to open vpn network
-# - name: connect slaves to open vpn network
-#   command: "openvpn --config client.ovpn"
+- name: connect slaves to open vpn network
+  shell: "openvpn --config client.ovpn &"
+  args:
+    chdir: /root/
 
 # Now this is the crucial part, joining our slave nodes to our master node 
 # “hostvars[groups[‘ec2_master’][0]]” option is calling the namespace of the master node from ec2 role.

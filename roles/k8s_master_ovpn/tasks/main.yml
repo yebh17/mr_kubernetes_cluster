@@ -1,6 +1,11 @@
 ---
 # tasks file for k8s_master
 
+- name: Install net-tools for network management
+  apt:
+    name: net-tools
+    state: present
+
 # Adding kubernetes repo from base url using gpg keys
 - name: install APT Transport HTTPS
   apt:
@@ -56,7 +61,7 @@
 
 # Pulling all the images required for k8s master on master node.
 - name: Pulling the images of k8s master
-  command: kubeadm config images pull
+  shell: kubeadm config images pull
 
 # Updating Docker cgroup on Master Node. Reason for using cgroupdriver as 'systemd' instead of default ones, 
 # https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/
@@ -67,82 +72,12 @@
       {
       "exec-opts": ["native.cgroupdriver=systemd"]
       }
+
 # Restart the docker on Master node to get all things activated
 - name: Restart docker on Master Node
   service:
     name: docker
     state: restarted
-
-# Initialize kubernetes cluster with a pod network so that the Pods can talk to each other, also ignoring errors like 'NumCPU', 'Mem'
-# and 'FileContent--proc-sys-net-bridge-bridge-nf-call-iptables' as they are limited to system resources.
-- name: initialize the cluster
-  shell: kubeadm init --pod-network-cidr=10.244.0.0/16
-  args:
-    chdir: $HOME
-    # creates: cluster_initialized.txt
-# Setting kubectl on master node with updating kubernetes configuration from default path to '$HOME/.kube/config' path and updating
-# ownership permissions to user and group.
-- name: create .kube directory
-  become: yes
-  become_user: ubuntu
-  file:
-    path: $HOME/.kube
-    state: directory
-    mode: 0755
-
-- name: copies admin.conf to user's kube config
-  copy:
-    src: /etc/kubernetes/admin.conf
-    dest: /home/ubuntu/.kube/config
-    remote_src: yes
-    owner: ubuntu
-
-- name: Pause for 1 minute to run calico
-  ansible.builtin.pause:
-    minutes: 1
-
-# Deploying a CNI plugin on master node, we use 'calico' for it, https://projectcalico.docs.tigera.io/about/about-calico
-- name: install Pod network
-  become: yes
-  become_user: ubuntu
-  shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.0/manifests/calico.yaml 
-  args:
-    chdir: $HOME
-  register: calico_debug
-
-- debug:
-      msg: "{{ calico_debug.stdout }}"
-
-# A token creation command for slave nodes. This command is used to get the token for the slave node to join the cluster.
-# Using “register” the output of the “command” module is stored in a variable called “token”.
-# Now this token variable contain the command that we need to run on slave node, so that it joins the master node.
-# - name: Creating token for Slave
-#   command: kubeadm token create  --print-join-command
-#   register: token
-
-#  Add universe repo
-- name: add universe repo
-  become: yes
-  become_user: root
-  expect:
-    command: "apt-add-repository universe"
-    responses:
-      'Press \[ENTER\] to continue or Ctrl\-c to cancel\.': ''
-
-# Package update
-- name: apt update
-  become: yes
-  become_user: root
-  command: "apt update"
-
-#Python installation
-- name: install python2.7
-  become: yes
-  become_user: root
-  expect:
-    command: "apt install python2-minimal"
-    responses:
-        'Do you want to continue\? \[Y\/n\]': 'y'
 
 # Install ovpn
 - name: "Installing OpenVPN"
@@ -156,9 +91,65 @@
     src: client.ovpn
     dest: "/root/"
 
+- name: Get node name
+  shell: curl http://169.254.169.254/latest/meta-data/local-hostname
+  register: hostname
+
+- name: Get the vps gateway ip 
+  shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
+  register: private_ip
+
+- name: Arrange route for ssh to access via primary interface
+  shell: "route add -host 213.112.64.208 gw {{ private_ip.stdout }}"
+
 # connect slaves to open vpn network
-# - name: connect slaves to open vpn network
-#   command: "openvpn --config client.ovpn"
+- name: connect slaves to open vpn network
+  shell: "openvpn --config client.ovpn &"
+  args:
+    chdir: $HOME
+
+- name: Get the tunnel iface ip
+  shell: ip -f inet addr show tun0 | awk '/inet / {print $2}'
+  register: vpn_iface_ip
+
+# Initialize kubernetes cluster with a pod network so that the Pods can talk to each other, also ignoring errors like 'NumCPU', 'Mem'
+# and 'FileContent--proc-sys-net-bridge-bridge-nf-call-iptables' as they are limited to system resources.
+- name: initialize the cluster
+  shell: "kubeadm init --apiserver-advertise-address={{ vpn_iface_ip.stdout }} --pod-network-cidr=10.244.0.0/16"
+  args:
+    chdir: $HOME
+  register: token_log
+- debug:
+      msg: "{{ token_log.stdout }}"
+
+# Setting kubectl on master node with updating kubernetes configuration from default path to '$HOME/.kube/config' path and updating
+# ownership permissions to user and group.
+- name: create .kube directory
+  become: yes
+  file:
+    path: $HOME/.kube
+    state: directory
+    mode: 0755
+
+- name: copies admin.conf to user's kube config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: $HOME/.kube/config
+    remote_src: yes
+
+- name: Pause for 1 minute to run calico
+  ansible.builtin.pause:
+    minutes: 1
+
+# Deploying a CNI plugin on master node, we use 'calico' for it, https://projectcalico.docs.tigera.io/about/about-calico
+- name: install Pod network
+  become: yes
+  shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.0/manifests/calico.yaml 
+  args:
+    chdir: $HOME
+  register: calico_debug
+- debug:
+      msg: "{{ calico_debug.stdout }}"
 
 # Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the master node,
 # because while doing the setup it will create lots of temporary data on RAM
