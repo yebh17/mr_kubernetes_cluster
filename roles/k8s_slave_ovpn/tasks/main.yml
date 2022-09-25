@@ -98,6 +98,9 @@
   shell: curl http://169.254.169.254/latest/meta-data/local-hostname
   register: hostname
 
+- name: Set hostname as FQDN
+  shell: hostnamectl set-hostname {{ hostname.stdout }}
+
 - name: Get the vps gateway ip 
   shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
   register: private_ip
@@ -110,6 +113,12 @@
   shell: "openvpn --config client.ovpn &"
   args:
     chdir: /root/
+
+- name: Workaround for running kubeadm
+  shell:
+    cmd: |
+      rm /etc/containerd/config.toml
+      systemctl restart containerd
 
 # Now this is the crucial part, joining our slave nodes to our master node 
 # “hostvars[groups[‘ec2_master’][0]]” option is calling the namespace of the master node from ec2 role.
