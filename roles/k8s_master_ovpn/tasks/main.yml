@@ -91,12 +91,15 @@
     src: client.ovpn
     dest: "/root/"
 
-- name: Get node name
-  shell: curl http://169.254.169.254/latest/meta-data/local-hostname
-  register: hostname
+- name: swapp off
+  shell: swapoff -a
 
-- name: Set hostname as FQDN
-  shell: hostnamectl set-hostname {{ hostname.stdout }}
+# - name: Get node name
+#   shell: curl http://169.254.169.254/latest/meta-data/local-hostname
+#   register: hostname
+
+# - name: Set hostname as FQDN
+#   shell: hostnamectl set-hostname {{ hostname.stdout }}
 
 - name: Get the vps gateway ip 
   shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
@@ -127,18 +130,18 @@
 
 # Setting kubectl on master node with updating kubernetes configuration from default path to '$HOME/.kube/config' path and updating
 # ownership permissions to user and group.
-- name: create .kube directory
-  become: yes
-  file:
-    path: $HOME/.kube
-    state: directory
-    mode: 0755
+- name: create a directory for kube configs
+  shell: mkdir -p $HOME/.kube
 
-- name: copies admin.conf to user's kube config
-  copy:
-    src: /etc/kubernetes/admin.conf
-    dest: $HOME/.kube/config
-    remote_src: yes
+- name: copy config file to new directory
+  shell: cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+
+- name: Set permissions for the file
+  shell: chown $(id -u):$(id -g) $HOME/.kube/config
+
+# Only required this if the user is root
+- name: export admin config
+  shell: export KUBECONFIG=/etc/kubernetes/admin.conf
 
 - name: Pause for 1 minute to run calico
   ansible.builtin.pause:
