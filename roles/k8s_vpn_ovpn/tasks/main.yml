@@ -181,60 +181,61 @@
   tags:
     - setconfig
 
-- name: "Setting IP forwarding"
-  lineinfile: 
-    path: /etc/sysctl.conf
-    regexp: 'net.ipv4.ip_forward' 
-    line: "net.ipv4.ip_forward=1"
-  tags:
-    - setipforward
+- name: "Add dns for vpn traffic to access internet"
+  lineinfile:
+    path: /etc/openvpn/server.conf
+    insertafter: 'push "redirect-gateway def1 bypass-dhcp"'
+    line: 'push "dhcp-option DNS 8.8.8.8"'
+    firstmatch: yes
+    state: present  
 
-- name: "Sysctl reload"
-  shell: sysctl -p
-  tags:
-    - setipforward
+# - name: "IP forward settings"
+#   lineinfile: 
+#     path: /etc/default/ufw
+#     regexp: 'DEFAULT_FORWARD_POLICY' 
+#     line: 'DEFAULT_FORWARD_POLICY="ACCEPT"'
+#   tags:
+#     - firewallconfig
 
-- name: "IP forward settings"
-  lineinfile: 
-    path: /etc/default/ufw
-    regexp: 'DEFAULT_FORWARD_POLICY' 
-    line: 'DEFAULT_FORWARD_POLICY="ACCEPT"'
-  tags:
-    - firewallconfig
+# - name: "Allow VPN traffic on port 1194 UDP"
+#   shell: ufw allow 1194/udp
+#   tags:
+#     - firewallconfig
 
-- name: "Allow VPN traffic on port 1194 UDP"
-  shell: ufw allow 1194/udp
-  tags:
-    - firewallconfig
-
-- name: "Allow VPN traffic on SSH"
-  shell: ufw allow OpenSSH
-  tags:
-    - firewallconfig
+# - name: "Allow VPN traffic on SSH"
+#   shell: ufw allow OpenSSH
+#   tags:
+#     - firewallconfig
 
 - name: "Get the interface name"
-  shell: ip -o -4 route show to default | cut -d " " -f 5
+  shell: ip -br l | awk '$1 !~ "lo|vir|wl|tun0|docker0|cali" { print $1}'
   register: iface
 
-- name: Masquerade traffic from VPN
-  blockinfile:
-    path: /etc/ufw/before.rules
-    block: |  
-      # START OPENVPN RULES
-      # NAT table rules
-      *nat
-      :POSTROUTING ACCEPT [0:0] 
-      # Allow traffic from OpenVPN client  (change to the interface you discovered!)
-      -A POSTROUTING -o {{ iface.stdout }} -j MASQUERADE
-      COMMIT
-      # END OPENVPN RULES
-  tags:
-    - masq
+- name: "Set ip_forward setting"
+  shell: echo "1" > /proc/sys/net/ipv4/ip_forward
 
-- name: "Reload firewall"
-  shell: ufw disable && ufw --force enable
-  tags:
-    - firewallconfig
+- name: "Set ip tables to nat"
+  shell: iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o {{ iface.stdout }} -j MASQUERADE
+
+# - name: Masquerade traffic from VPN
+#   blockinfile:
+#     path: /etc/ufw/before.rules
+#     block: |  
+#       # START OPENVPN RULES
+#       # NAT table rules
+#       *nat
+#       :POSTROUTING ACCEPT [0:0] 
+#       # Allow traffic from OpenVPN client  (change to the interface you discovered!)
+#       -A POSTROUTING -s 10.8.0.0/24 -o {{ iface.stdout }} -j MASQUERADE
+#       COMMIT
+#       # END OPENVPN RULES
+#   tags:
+#     - masq
+
+# - name: "Reload firewall"
+#   shell: ufw disable && ufw --force enable
+#   tags:
+#     - firewallconfig
 
 - name: "Insert a line at the end of a file for producing dynamic ips for clients"
   lineinfile:

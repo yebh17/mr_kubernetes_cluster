@@ -6,6 +6,31 @@
     name: net-tools
     state: present
 
+- name: Get the vps gateway ip 
+  shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
+  register: private_ip
+
+- name: Arrange route for ssh to access via primary interface
+  shell: "route add -host 213.112.64.208 gw {{ private_ip.stdout }}"
+
+# Install ovpn
+- name: "Installing OpenVPN"
+  apt: name={{item}} state=present
+  with_items:
+    - openvpn
+
+# Configure client ovpn
+- name: "Configure client ovpn"
+  template:
+    src: client.ovpn
+    dest: "/root/"
+
+# connect slaves to open vpn network
+- name: connect slaves to open vpn network
+  shell: "openvpn --config client.ovpn &"
+  args:
+    chdir: /root/
+
 # Adding kubernetes repo from base url using gpg keys
 - name: install APT Transport HTTPS
   apt:
@@ -82,18 +107,6 @@
 - name: Reloading sysctl on Slave Node
   command: sysctl --system
 
-# Install ovpn
-- name: "Installing OpenVPN"
-  apt: name={{item}} state=present
-  with_items:
-    - openvpn
-
-# Configure client ovpn
-- name: "Configure client ovpn"
-  template:
-    src: client.ovpn
-    dest: "/root/"
-
 - name: Get node name
   shell: curl http://169.254.169.254/latest/meta-data/local-hostname
   register: hostname
@@ -101,24 +114,13 @@
 - name: Set hostname as FQDN
   shell: hostnamectl set-hostname {{ hostname.stdout }}
 
-- name: Get the vps gateway ip 
-  shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
-  register: private_ip
-
-- name: Arrange route for ssh to access via primary interface
-  shell: "route add -host 213.112.64.208 gw {{ private_ip.stdout }}"
-
-# connect slaves to open vpn network
-- name: connect slaves to open vpn network
-  shell: "openvpn --config client.ovpn &"
-  args:
-    chdir: /root/
-
-- name: Workaround for running kubeadm
+- name: Workaround for running kube-api server on ubuntu_21.x and later versions
   shell:
     cmd: |
-      rm /etc/containerd/config.toml
-      systemctl restart containerd
+      containerd config default | tee /etc/containerd/config.toml
+      sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+      service containerd restart
+      service kubelet restart
 
 # Now this is the crucial part, joining our slave nodes to our master node 
 # “hostvars[groups[‘ec2_master’][0]]” option is calling the namespace of the master node from ec2 role.
