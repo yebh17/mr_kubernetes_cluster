@@ -6,6 +6,13 @@
     name: net-tools
     state: present
 
+# - name: Get node name
+#   shell: curl http://169.254.169.254/latest/meta-data/local-hostname
+#   register: hostname
+
+# - name: Set hostname as FQDN
+#   shell: hostnamectl set-hostname {{ hostname.stdout }}
+
 - name: Get the vps gateway ip 
   shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
   register: private_ip
@@ -119,13 +126,6 @@
 - name: Reloading sysctl on master Node
   command: sysctl --system
 
-- name: Get node name
-  shell: curl http://169.254.169.254/latest/meta-data/local-hostname
-  register: hostname
-
-- name: Set hostname as FQDN
-  shell: hostnamectl set-hostname {{ hostname.stdout }}
-
 - name: Workaround for running kube-api server on ubuntu_21.x and later versions
   shell:
     cmd: |
@@ -134,14 +134,14 @@
       service containerd restart
       service kubelet restart
 
-- name: Pause for 1 minute to run calico
-  ansible.builtin.pause:
-    minutes: 1
+- name: Get openvpn tunnel ip
+  shell: ip -4 addr show tun0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}'
+  register: tunnel_ip
 
 # Initialize kubernetes cluster with a pod network so that the Pods can talk to each other, also ignoring errors like 'NumCPU', 'Mem'
 # and 'FileContent--proc-sys-net-bridge-bridge-nf-call-iptables' as they are limited to system resources.
 - name: initialize the cluster
-  shell: "kubeadm init --pod-network-cidr=192.168.0.0/16"
+  shell: "kubeadm init --apiserver-advertise-address {{ tunnel_ip.stdout }} --pod-network-cidr=192.168.0.0/16"
   args:
     chdir: $HOME
   register: token_log
@@ -175,6 +175,18 @@
   register: calico_debug
 - debug:
       msg: "{{ calico_debug.stdout }}"
+
+# Configure client ovpn
+- name: "copy deployments file to master"
+  template:
+    src: deployments.yml
+    dest: "/root/"
+
+# Configure client ovpn
+- name: "copy services file to master"
+  template:
+    src: services.yml
+    dest: "/root/"
 
 # Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the master node,
 # because while doing the setup it will create lots of temporary data on RAM
