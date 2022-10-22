@@ -1,4 +1,78 @@
 ---
-# tasks file for k8s_vpn
 
-# Installing ovpn
+- name: Install net-tools for network management
+  apt:
+    name: net-tools
+    state: present
+
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+- name: Download softether from internet
+  shell: wget https://github.com/SoftEtherVPN/SoftEtherVPN_Stable/releases/download/v4.38-9760-rtm/softether-vpnserver-v4.38-9760-rtm-2021.08.17-linux-x64-64bit.tar.gz
+  args:
+    chdir: $HOME
+
+- name: Untar the softether vpnserver
+  shell: tar xzvf softether-vpnserver-v4.38-9760-rtm-2021.08.17-linux-x64-64bit.tar.gz
+  args:
+    chdir: $HOME
+
+- name: Download build-essentials packages
+  shell: apt-get install build-essential -y
+
+- name: build the softether vpn server
+  shell: make
+  args:
+    chdir: $HOME/vpnserver
+
+- name: Run vpnserver from anywhere
+  shell: mv vpnserver/ /usr/local/
+  args:
+    chdir: $HOME
+
+- name: Set limited permissions to vpnserver and related utilities
+  shell: chmod 600 * && chmod 700 vpnserver && chmod 700 vpncmd
+  args:
+    chdir: /usr/local/vpnserver/
+
+- name: Creating an empty vpnserver file
+  file:
+    path: "/etc/init.d/vpnserver"
+    state: touch
+
+- name: Prepare the vpnserver file to run during startup
+  copy:
+    dest: "/etc/init.d/vpnserver"
+    content: |
+      #!/bin/sh
+      # chkconfig: 2345 99 01
+      # description: SoftEther VPN Server
+      DAEMON=/usr/local/vpnserver/vpnserver
+      LOCK=/var/lock/subsys/vpnserver
+      test -x $DAEMON || exit 0
+      case "$1" in
+      start)
+      $DAEMON start
+      touch $LOCK
+      ;;
+      stop)
+      $DAEMON stop
+      rm $LOCK
+      ;;
+      restart)
+      $DAEMON stop
+      sleep 3
+      $DAEMON start
+      ;;
+      *)
+      echo "Usage: $0 {start|stop|restart}"
+      exit 1
+      esac
+      exit 0
+
+- name: Set limited permissions to vpnserver and start the server
+  shell: chmod 755 /etc/init.d/vpnserver && /etc/init.d/vpnserver start
+
+- name: Command run to enable the vpnserver to run during startup
+  shell: update-rc.d vpnserver defaults
