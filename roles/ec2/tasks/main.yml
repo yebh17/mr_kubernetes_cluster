@@ -87,6 +87,6 @@
 # Waiting for the ssh to start on all nodes
 - name: Wait for SSH to come up
   wait_for:
-    host: "{{ ec2.results[2].instances[0].public_dns_name }}"
+    host: "{{ ec2.results[4].instances[0].public_dns_name }}"
     port: 22
     state: started

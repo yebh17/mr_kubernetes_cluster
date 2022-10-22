@@ -4,12 +4,14 @@ cd /usr/local/vpnserver
 ./vpncmd
 3
 check
+ctrl-c
 
 # Change Admin Password
 
 ./vpncmd
 1
 ## enter your server private-ip
+## leave the "Specify Virtual Hub Name" empty
 ServerPasswordSet
 ## enter any Password
 
@@ -25,10 +27,23 @@ Hub VPN
 
 SecureNatEnable
 
-# Create and Manage Users
+# Create and Manage Users clien1, client2, client3, client4
 
 UserCreate client1
+## leave all the full-name, groups, description fields empty
 UserPasswordSet client1
+
+UserCreate client2
+## leave all the full-name, groups, description fields empty
+UserPasswordSet client2
+
+UserCreate client3
+## leave all the full-name, groups, description fields empty
+UserPasswordSet client3
+
+UserCreate client4
+## leave all the full-name, groups, description fields empty
+UserPasswordSet client4
 
 # Setup L2TP/IPSec
 
@@ -37,5 +52,6 @@ IPsecEnable
 ## Enable Raw L2TP Server Function: This will enable L2TP VPN for clients with no IPSec encryption.
 ## Enable EtherIP / L2TPv3 over IPsec Server Function: Routers which are compatible with EtherIP / L2TPv3 over IPsec can connect to this server by enabling this function.
 ## Pre Shared Key for IPsec: Enter a pre-shared key to use with L2TP VPN.
-## Default Virtual HUB in a case of omitting the HUB on the Username: Users must specify the Virtual Hub they are trying to connect to by using Username@TargetHubName as their username when connecting. This option specifies which Virtual Hub to be used if the user does not provide such information. In our case enter VPN.
+## Default Virtual HUB in a case of omitting the HUB on the Username: Users must specify the Virtual Hub they are trying to connect to by using Username@TargetHubName as their username when connecting. This option specifies which Virtual Hub to be used if the user does not provide such information.
+   In our case enter VPN.
 
