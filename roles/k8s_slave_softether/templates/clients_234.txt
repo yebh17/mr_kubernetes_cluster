@@ -20,6 +20,7 @@ AccountConnect connection2
 AccountStatusGet connection2
 
 # Create route to allow traffic via vpn server gateway
+echo 1 > /proc/sys/net/ipv4/ip_forward
 dhclient vpn_sofether2
 ip route add <vpn-server-public-ip>/32 via 172.31.0.1
 
@@ -45,6 +46,7 @@ AccountConnect connection3
 AccountStatusGet connection3
 
 # Create route to allow traffic via vpn server gateway
+echo 1 > /proc/sys/net/ipv4/ip_forward
 dhclient vpn_sofether3
 ip route add <vpn-server-public-ip>/32 via 172.31.0.1
 
@@ -70,5 +72,6 @@ AccountConnect connection4
 AccountStatusGet connection4
 
 # Create route to allow traffic via vpn server gateway
+echo 1 > /proc/sys/net/ipv4/ip_forward
 dhclient vpn_sofether4
 ip route add <vpn-server-public-ip>/32 via 172.31.0.1

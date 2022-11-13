@@ -48,9 +48,6 @@
   args:
     chdir: /usr/local/vpnclient/
 
-- name: Enable IP forward
-  shell: echo 1 > /proc/sys/net/ipv4/ip_forward
-
 # Adding kubernetes repo from base url using gpg keys
 - name: install APT Transport HTTPS
   apt:
@@ -123,22 +120,6 @@
 - name: swapp off
   shell: swapoff -a
 
-# Updating IP tables on Slave Node. Usually in the linux distros like ubuntu,
-# (https://www.kevinhooke.com/2018/11/23/checking-iptables-filtering-for-bridge-networking-on-ubuntu-for-kubernetes-setup/)
-# the bridge module in the kernel for "ip6tables, iptables and arptables" has the default set to "1"
-# ("on", i.e. "*do* send the packets to iptables"), but for the distros like Fedora, RHEL, and CentOS they are set to '0' so we need to
-# update the '/etc/sysctl.d/k8s.conf' to set it to '1'
-- name: Updating IP tables on master Node
-  copy:
-    dest: /etc/sysctl.d/k8s.conf
-    content: |
-      net.bridge.bridge-nf-call-ip6tables = 1
-      net.bridge.bridge-nf-call-iptables = 1
-
-# Reloading sysctl on Slave Node to activate the bridge changes
-- name: Reloading sysctl on master Node
-  command: sysctl --system
-
 - name: Workaround for running kube-api server on ubuntu_21.x and later versions
   shell:
     cmd: |
@@ -146,3 +127,15 @@
       sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
       service containerd restart
       service kubelet restart
+
+# Configure client ovpn
+- name: "copy deployments file to master"
+  template:
+    src: deployments.yml
+    dest: "/root/"
+
+# Configure client ovpn
+- name: "copy services file to master"
+  template:
+    src: services.yml
+    dest: "/root/"

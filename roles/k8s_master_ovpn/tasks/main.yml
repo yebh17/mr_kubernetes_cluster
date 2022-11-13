@@ -110,7 +110,7 @@
 - name: swapp off
   shell: swapoff -a
 
-# Updating IP tables on Slave Node. Usually in the linux distros like ubuntu,
+# Updating IP tables on Master Node. Usually in the linux distros like ubuntu,
 # (https://www.kevinhooke.com/2018/11/23/checking-iptables-filtering-for-bridge-networking-on-ubuntu-for-kubernetes-setup/)
 # the bridge module in the kernel for "ip6tables, iptables and arptables" has the default set to "1"
 # ("on", i.e. "*do* send the packets to iptables"), but for the distros like Fedora, RHEL, and CentOS they are set to '0' so we need to
