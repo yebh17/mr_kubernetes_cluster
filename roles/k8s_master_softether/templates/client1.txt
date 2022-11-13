@@ -22,3 +22,11 @@ AccountStatusGet connection1
 # Create route to allow traffic via vpn server gateway
 dhclient vpn_sofether1
 ip route add <vpn-server-public-ip>/32 via 172.31.0.1
+
+# Kubernetes Setup
+kubeadm init --apiserver-advertise-address <vpn_sofether1_ip> --pod-network-cidr=192.168.0.0/16
+mkdir -p $HOME/.kube
+cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+chown $(id -u):$(id -g) $HOME/.kube/config
+kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+echo 3 > /proc/sys/vm/drop_caches
