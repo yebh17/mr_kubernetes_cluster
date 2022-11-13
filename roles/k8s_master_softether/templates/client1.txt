@@ -18,3 +18,7 @@ AccountPasswordSet connection1
 standard
 AccountConnect connection1
 AccountStatusGet connection1
+
+# Create route to allow traffic via vpn server gateway
+dhclient vpn_sofether1
+ip route add <vpn-server-public-ip>/32 via 172.31.0.1
