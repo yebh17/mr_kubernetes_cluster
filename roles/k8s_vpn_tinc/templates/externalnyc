@@ -1,0 +1,2 @@
+Address = externalnyc_public_IP
+Subnet = 10.0.0.1/32

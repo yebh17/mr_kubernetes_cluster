@@ -1,0 +1,15 @@
+# Change slave to slave1 at /etc/tinc/netname/hosts/slave1 and update with, Subnet = 10.0.0.3/32
+# Change slave to slave2 at /etc/tinc/netname/hosts/slave2 and update with, Subnet = 10.0.0.4/32
+# Change slave to slave3 at /etc/tinc/netname/hosts/slave3 and update with, Subnet = 10.0.0.5/32
+
+# Update /etc/tinc/netname/tinc-up in slave1 with, ifconfig $INTERFACE 10.0.0.3 netmask 255.255.255.0
+# Update /etc/tinc/netname/tinc-up in slave2 with, ifconfig $INTERFACE 10.0.0.4 netmask 255.255.255.0
+# Update /etc/tinc/netname/tinc-up in slave3 with, ifconfig $INTERFACE 10.0.0.5 netmask 255.255.255.0
+
+# Update 'node-name' in /etc/tinc/netname/tinc.conf in slave1 with, slave1
+# Update 'node-name' in /etc/tinc/netname/tinc.conf in slave2 with, slave2
+# Update 'node-name' in /etc/tinc/netname/tinc.conf in slave3 with, slave3
+
+# Copy /etc/tinc/netname/hosts/slave1 from slave1 server to vpn server to /etc/tinc/netname/hosts/ destination
+# Copy /etc/tinc/netname/hosts/slave2 from slave2 server to vpn server to /etc/tinc/netname/hosts/ destination
+# Copy /etc/tinc/netname/hosts/slave3 from slave3 server to vpn server to /etc/tinc/netname/hosts/ destination

@@ -1,0 +1,1 @@
+# Copy /etc/tinc/netname/hosts/master to vpn server to /etc/tinc/netname/hosts/ destination
