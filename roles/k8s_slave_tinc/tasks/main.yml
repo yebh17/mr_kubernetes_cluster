@@ -27,12 +27,6 @@
     src: slave
     dest: "/etc/tinc/netname/hosts/"
 
-- name: "create key pairs"
-  shell: tincd -n netname -K4096
-  responses:
-    'Please enter a file to save private RSA key to [/etc/tinc/netname/rsa_key.priv]: ': ''
-    'Please enter a file to save public RSA key to [/etc/tinc/netname/hosts/externalnyc]: ': ''
-
 - name: "copy tinc-up script"
   template:
     src: tinc-up
@@ -121,6 +115,14 @@
 # Reloading sysctl on Slave Node to activate the bridge changes
 - name: Reloading sysctl on Slave Node
   command: sysctl --system
+
+- name: Workaround for running kube-api server on ubuntu_21.x and later versions
+  shell:
+    cmd: |
+      containerd config default | tee /etc/containerd/config.toml
+      sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+      service containerd restart
+      service kubelet restart
 
 # Now this is the crucial part, joining our slave nodes to our master node 
 # “hostvars[groups[‘ec2_master’][0]]” option is calling the namespace of the master node from ec2 role.

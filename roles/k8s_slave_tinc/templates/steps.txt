@@ -1,15 +1,24 @@
-# Change slave to slave1 at /etc/tinc/netname/hosts/slave1 and update with, Subnet = 10.0.0.3/32
-# Change slave to slave2 at /etc/tinc/netname/hosts/slave2 and update with, Subnet = 10.0.0.4/32
-# Change slave to slave3 at /etc/tinc/netname/hosts/slave3 and update with, Subnet = 10.0.0.5/32
+NOTE: Go through the following steps only after ininitially starting your tinc vpn server.
 
+slave1:
+# Change slave to slave1 at /etc/tinc/netname/hosts/ and update with, Subnet = 10.0.0.3/32
 # Update /etc/tinc/netname/tinc-up in slave1 with, ifconfig $INTERFACE 10.0.0.3 netmask 255.255.255.0
+# Update 'node-name' in /etc/tinc/netname/tinc.conf with slave1
+# Generate the keypairs with command, tincd -n netname -K4096
+# Copy /etc/tinc/netname/hosts/slave1 to vpn server to /etc/tinc/netname/hosts/ destination
+
+# slave2:
+# Change slave to slave2 at /etc/tinc/netname/hosts/ and update with, Subnet = 10.0.0.4/32
 # Update /etc/tinc/netname/tinc-up in slave2 with, ifconfig $INTERFACE 10.0.0.4 netmask 255.255.255.0
+# Update 'node-name' in /etc/tinc/netname/tinc.conf with slave2
+# Generate the keypairs with command, tincd -n netname -K4096
+# Copy /etc/tinc/netname/hosts/slave2 to vpn server to /etc/tinc/netname/hosts/ destination
+
+# slave3:
+# Change slave to slave3 at /etc/tinc/netname/hosts/ and update with, Subnet = 10.0.0.5/32
 # Update /etc/tinc/netname/tinc-up in slave3 with, ifconfig $INTERFACE 10.0.0.5 netmask 255.255.255.0
+# Update 'node-name' in /etc/tinc/netname/tinc.conf with slave3
+# Generate the keypairs with command, tincd -n netname -K4096
+# Copy /etc/tinc/netname/hosts/slave3 to vpn server to /etc/tinc/netname/hosts/ destination
 
-# Update 'node-name' in /etc/tinc/netname/tinc.conf in slave1 with, slave1
-# Update 'node-name' in /etc/tinc/netname/tinc.conf in slave2 with, slave2
-# Update 'node-name' in /etc/tinc/netname/tinc.conf in slave3 with, slave3
-
-# Copy /etc/tinc/netname/hosts/slave1 from slave1 server to vpn server to /etc/tinc/netname/hosts/ destination
-# Copy /etc/tinc/netname/hosts/slave2 from slave2 server to vpn server to /etc/tinc/netname/hosts/ destination
-# Copy /etc/tinc/netname/hosts/slave3 from slave3 server to vpn server to /etc/tinc/netname/hosts/ destination
+# Now go through the 'kubernetes' section steps provided in 'roles/k8s_master_tinc/templates/steps.txt'

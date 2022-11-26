@@ -27,13 +27,6 @@
     src: master
     dest: "/etc/tinc/netname/hosts/"
 
-- name: "create key pairs"
-  ansible.builtin.expect:
-    command: tincd -n netname -K4096
-    responses:
-      'Please enter a file to save private RSA key to [/etc/tinc/netname/rsa_key.priv]: ': ''
-      'Please enter a file to save public RSA key to [/etc/tinc/netname/hosts/externalnyc]: ': ''
-
 - name: "copy tinc-up script"
   template:
     src: tinc-up
@@ -94,10 +87,6 @@
     state: started
     enabled: yes
 
-# Pulling all the images required for k8s master on master node.
-- name: Pulling the images of k8s master
-  command: kubeadm config images pull
-
 # Updating Docker cgroup on Master Node. Reason for using cgroupdriver as 'systemd' instead of default ones, 
 # https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/
 - name: Updating Docker cgroup on Master Node
@@ -113,23 +102,32 @@
     name: docker
     state: restarted
 
-# Initialize kubernetes cluster with a pod network so that the Pods can talk to each other, also ignoring errors like 'NumCPU', 'Mem'
-# and 'FileContent--proc-sys-net-bridge-bridge-nf-call-iptables' as they are limited to system resources.
-- name: Initializing k8s cluster
-  command: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem --ignore-preflight-errors=FileContent--proc-sys-net-bridge-bridge-nf-call-iptables
+- name: swapp off
+  shell: swapoff -a
 
-# Setting kubectl on master node with updating kubernetes configuration from default path to '$HOME/.kube/config' path and updating
-# ownership permissions to user and group 
-- name: Setting up kubectl on Master Node
+# Updating IP tables on Master Node. Usually in the linux distros like ubuntu,
+# (https://www.kevinhooke.com/2018/11/23/checking-iptables-filtering-for-bridge-networking-on-ubuntu-for-kubernetes-setup/)
+# the bridge module in the kernel for "ip6tables, iptables and arptables" has the default set to "1"
+# ("on", i.e. "*do* send the packets to iptables"), but for the distros like Fedora, RHEL, and CentOS they are set to '0' so we need to
+# update the '/etc/sysctl.d/k8s.conf' to set it to '1'
+- name: Updating IP tables on master Node
+  copy:
+    dest: /etc/sysctl.d/k8s.conf
+    content: |
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+
+# Reloading sysctl on Slave Node to activate the bridge changes
+- name: Reloading sysctl on master Node
+  command: sysctl --system
+
+- name: Workaround for running kube-api server on ubuntu_21.x and later versions
   shell:
     cmd: |
-      mkdir -p $HOME/.kube
-      sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-      sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
-# Deploying a CNI plugin on master node, we use 'calico' for it, https://projectcalico.docs.tigera.io/about/about-calico
-- name: Deploying Calico on Master Node
-  command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+      containerd config default | tee /etc/containerd/config.toml
+      sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+      service containerd restart
+      service kubelet restart
 
 # A token creation command for slave nodes. This command is used to get the token for the slave node to join the cluster.
 # Using “register” the output of the “command” module is stored in a variable called “token”.
@@ -137,6 +135,18 @@
 # - name: Creating token for Slave
 #   command: kubeadm token create  --print-join-command
 #   register: token
+
+# Configure client ovpn
+- name: "copy deployments file to master"
+  template:
+    src: deployments.yml
+    dest: "/root/"
+
+# Configure client ovpn
+- name: "copy services file to master"
+  template:
+    src: services.yml
+    dest: "/root/"
 
 # Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the master node,
 # because while doing the setup it will create lots of temporary data on RAM

@@ -39,12 +39,6 @@
     regexp: 'externalnyc_public_IP'
     replace: "{{ vpn_public_ip.stdout }}"
 
-- name: "create key pairs"
-  shell: tincd -n netname -K4096
-  responses:
-    'Please enter a file to save private RSA key to [/etc/tinc/netname/rsa_key.priv]: ': ''
-    'Please enter a file to save public RSA key to [/etc/tinc/netname/hosts/externalnyc]: ': ''
-
 - name: "Copy tinc-up file"
   template:
     src: tinc-up

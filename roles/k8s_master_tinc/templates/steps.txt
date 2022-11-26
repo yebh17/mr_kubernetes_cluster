@@ -1,1 +1,18 @@
+NOTE: Go through the following steps only after ininitially starting your tinc vpn server.
+
+VPN:
+# Generate the keypairs with command, tincd -n netname -K4096
 # Copy /etc/tinc/netname/hosts/master to vpn server to /etc/tinc/netname/hosts/ destination
+
+Kubernetes:
+(NOTE: Go through the following steps only after setting all your vpn clients)
+# Run this command in all the servers, sudo tincd -n netname -D -d3 &
+# kubeadm init --apiserver-advertise-address 10.0.0.2 --pod-network-cidr=192.168.0.0/16
+# mkdir -p $HOME/.kube
+# sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+# sudo chown $(id -u):$(id -g) $HOME/.kube/config
+# kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+# Copy the command with token we got from kubeadm init output and run it in slave1, slave2 and slave3
+# After successfully adding slaves to the cluster run the deployment and service manifests as below,
+# kubectl apply -f /root/deployments.yml
+# kubectl apply -f /root/services.yml
