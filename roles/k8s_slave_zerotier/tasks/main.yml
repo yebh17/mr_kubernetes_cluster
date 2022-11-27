@@ -1,5 +1,30 @@
----
-# tasks file for k8s_slave
+- name: Install net-tools for network management
+  apt:
+    name: net-tools
+    state: present
+
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes
+
+- name: Copy the bash script to our nodes, the script downloads and installs ZeroTier App
+  template:
+    src: vpn.sh
+    dest: "/root/"
+
+- name: Make the vpn script executable
+  shell: chmod 755 /root/vpn.sh
+
+- name: Run the vpn script 
+  shell: /root/vpn.sh
+  register: vpn_setup_slave_debug
+- debug:
+      msg: "{{ vpn_setup_slave_debug.stdout }}"
+
+- name: Join the machine to the vpn network
+  shell: zerotier-cli join 8bd5124fd64a2f39
+  register: join_node_slave_debug
+- debug:
+      msg: "{{ join_node_slave_debug.stdout }}"
 
 # Adding kubernetes repo from base url using gpg keys
 - name: install APT Transport HTTPS
@@ -76,6 +101,14 @@
 # Reloading sysctl on Slave Node to activate the bridge changes
 - name: Reloading sysctl on Slave Node
   command: sysctl --system
+
+- name: Workaround for running kube-api server on ubuntu_21.x and later versions
+  shell:
+    cmd: |
+      containerd config default | tee /etc/containerd/config.toml
+      sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+      service containerd restart
+      service kubelet restart
 
 # Now this is the crucial part, joining our slave nodes to our master node 
 # “hostvars[groups[‘ec2_master’][0]]” option is calling the namespace of the master node from ec2 role.

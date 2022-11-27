@@ -1,4 +1,12 @@
 ---
-# tasks file for k8s_vpn
+# ZeroTier provides a web console for network management and endpoint software for the clients. 
+# It’s an encrypted Peer-to-Peer technology, meaning that unlike traditional VPN solutions, communications don’t need to pass through a central server or router — messages are sent directly from host to host.
+# Software-Defined Networking doesn’t utilize the traditional client/server design, there is no central VPN server to install and configure; this streamlines deployment of the tool and the addition of any supplementary nodes. 
 
-# Installing ovpn
+- name: Print the peer-to-peer network configuration setup information
+  ansible.builtin.debug:
+    msg: 
+      Open the https://my.zerotier.com/ and login with your credentials or create one if its your first time.
+      Click on the 'Create a Network' icon
+      click on the network that we just got created
+      select Public for the Access control option.
