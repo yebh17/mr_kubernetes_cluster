@@ -32,10 +32,10 @@
         name: k8s_slave_wg
 
 # Run vpn server
-# - hosts: ec2_vpn
-#   gather_facts: no
-#   become: yes
-#   tasks:
-#     - name: Running K8s VPN Role
-#       include_role:
-#         name: k8s_vpn
+- hosts: ec2_vpn
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Running K8s VPN Role
+      include_role:
+        name: k8s_vpn_wg

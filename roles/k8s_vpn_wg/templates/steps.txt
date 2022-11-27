@@ -1,0 +1,9 @@
+# In this vpn server /etc/wireguard/wg0.conf file:
+## update the CLIENT1_PUBLIC_KEY with your master public key
+(NOTE: While updating the slave nodes public keys in the wg server's config, make sure if the wg interface IP is the correct one associated to the public key)
+## update the CLIENT2_PUBLIC_KEY with your client2 public key
+## update the CLIENT3_PUBLIC_KEY with your client3 public key
+## update the CLIENT4_PUBLIC_KEY with your client4 public key
+
+# Now run the wg server with, wg-quick up wg0
+# You can check the status with, wg show

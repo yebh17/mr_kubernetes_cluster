@@ -3,5 +3,21 @@ Address = 10.0.0.1/24
 SaveConfig = true
 ListenPort = 51820
 PrivateKey = SERVER_PRIVATE_KEY
-PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o ens5 -j MASQUERADE
-PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o ens5 -j MASQUERADE
+PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o iface -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o iface -j MASQUERADE
+
+[Peer]
+PublicKey = CLIENT1_PUBLIC_KEY
+AllowedIPs = 10.0.0.2/32
+
+[Peer]
+PublicKey = CLIENT2_PUBLIC_KEY
+AllowedIPs = 10.0.0.3/32
+
+[Peer]
+PublicKey = CLIENT3_PUBLIC_KEY
+AllowedIPs = 10.0.0.4/32
+
+[Peer]
+PublicKey = CLIENT4_PUBLIC_KEY
+AllowedIPs = 10.0.0.5/32

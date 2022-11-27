@@ -124,11 +124,11 @@
       service containerd restart
       service kubelet restart
 
-# Now this is the crucial part, joining our slave nodes to our master node 
-# “hostvars[groups[‘ec2_master’][0]]” option is calling the namespace of the master node from ec2 role.
-# Next, using “[‘token’][‘stdout’]” we just parse the command that we can use in slave to join the master node
-# - name: Joining the master node
-#   command: "{{ hostvars[groups['ec2_master'][0]]['token']['stdout'] }}"
+# copy steps to follow to the server
+- name: "copy services file to master"
+  template:
+    src: steps.txt
+    dest: "/root/"
 
 # Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the slave nodes,
 # because while doing the setup it will create lots of temporary data on RAM

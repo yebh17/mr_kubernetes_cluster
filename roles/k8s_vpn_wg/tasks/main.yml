@@ -1,7 +1,11 @@
 ---
 # tasks file for k8s_vpn
 
-# Installing wireguard
+- name: Install net-tools for network management
+  apt:
+    name: net-tools
+    state: present
+
 - name: install wireguard
   apt:
     name: wireguard
@@ -12,21 +16,45 @@
   shell:
     cmd: umask 077 && wg genkey | sudo tee /etc/wireguard/privatekey | wg pubkey | sudo tee /etc/wireguard/publickey
 
-- name: create server wireguard config
+- name: copy server wireguard config
   template:
+    src: wg0.conf.j2
     dest: /etc/wireguard/wg0.conf
-    src: roles/k8s_vpn/templates/wg0.conf.j2
-    owner: root
-    group: root
-    mode: '0600'
 
-- name: replace line
-  lineinfile: 
-    path: /etc/sysctl.conf
-    regexp: '^(.*)#net.ipv4.ip_forward=1(.*)$' 
-    line: 'net.ipv4.ip_forward=1'
-    backrefs: yes
+- name: Get the default interface
+  shell: ip -o -4 route show to default | awk '{print $5}'
+  register: iface
 
-- name: Apply the ip forwarding change
-  shell:
-    cmd: sysctl -p
+- name: Replace interface to the associated default interface
+  ansible.builtin.replace:
+    path: /etc/wireguard/wg0.conf
+    regexp: 'iface'
+    replace: '{{ iface.stdout }}'
+
+- name: Get server private key
+  shell: cat /etc/wireguard/privatekey
+  register: server_private_key
+
+- name: Replace SERVER_PRIVATE_KEY with the wg generated private key
+  ansible.builtin.replace:
+    path: /etc/wireguard/wg0.conf
+    regexp: 'SERVER_PRIVATE_KEY'
+    replace: '{{ server_private_key.stdout }}'
+
+- name: Get the vps gateway ip 
+  shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
+  register: vpn_private_ip
+
+- name: Arrange route for ssh to access via primary interface
+  shell: "route add -host 213.112.64.208 gw {{ vpn_private_ip.stdout }}"
+
+# - name: replace line
+#   lineinfile: 
+#     path: /etc/sysctl.conf
+#     regexp: '^(.*)#net.ipv4.ip_forward=1(.*)$' 
+#     line: 'net.ipv4.ip_forward=1'
+#     backrefs: yes
+
+# - name: Apply the ip forwarding change
+#   shell:
+#     cmd: sysctl -p

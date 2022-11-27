@@ -115,3 +115,14 @@
       sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
       service containerd restart
       service kubelet restart
+
+# copy steps to follow to the server
+- name: "copy services file to master"
+  template:
+    src: clients_234.txt
+    dest: "/root/"
+
+# Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the slave nodes,
+# because while doing the setup it will create lots of temporary data on RAM
+- name: Cleaning Caches on RAM
+  shell: echo 3 > /proc/sys/vm/drop_caches

@@ -1,6 +1,42 @@
 ---
 # tasks file for k8s_slave
 
+- name: Install net-tools for network management
+  apt:
+    name: net-tools
+    state: present
+
+- name: install wireguard client
+  apt:
+    name: wireguard
+    state: present
+    update_cache: yes
+
+- name: generate public and private key
+  shell: umask 077 && wg genkey | sudo tee /etc/wireguard/privatekey | wg pubkey | sudo tee /etc/wireguard/publickey
+
+- name: copy client wireguard config
+  template:
+    dest: /etc/wireguard/wg0.conf
+    src: wg0.conf.j2
+
+- name: Get client private key
+  shell: cat /etc/wireguard/privatekey
+  register: client_private_key
+
+- name: Replace CLIENT_PRIVATE_KEY with the wg generated private key
+  ansible.builtin.replace:
+    path: /etc/wireguard/wg0.conf
+    regexp: 'CLIENT_PRIVATE_KEY'
+    replace: '{{ client_private_key.stdout }}'
+
+- name: Get the vps gateway ip 
+  shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
+  register: slaves_private_ip
+
+- name: Arrange route for ssh to access via primary interface
+  shell: "route add -host 213.112.64.208 gw {{ slaves_private_ip.stdout }}"
+
 # Adding kubernetes repo from base url using gpg keys
 - name: install APT Transport HTTPS
   apt:
@@ -77,29 +113,19 @@
 - name: Reloading sysctl on Slave Node
   command: sysctl --system
 
-# Now this is the crucial part, joining our slave nodes to our master node 
-# “hostvars[groups[‘ec2_master’][0]]” option is calling the namespace of the master node from ec2 role.
-# Next, using “[‘token’][‘stdout’]” we just parse the command that we can use in slave to join the master node
-# - name: Joining the master node
-#   command: "{{ hostvars[groups['ec2_master'][0]]['token']['stdout'] }}"
-
-- name: install wireguard client
-  apt:
-    name: wireguard
-    state: present
-    update_cache: yes
-
-- name: generate public and private key
+- name: Workaround for running kube-api server on ubuntu_21.x and later versions
   shell:
-    cmd: umask 077 && wg genkey | sudo tee /etc/wireguard/privatekey | wg pubkey | sudo tee /etc/wireguard/publickey
+    cmd: |
+      containerd config default | tee /etc/containerd/config.toml
+      sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+      service containerd restart
+      service kubelet restart
 
-- name: create client wireguard config
+# copy steps to follow to the server
+- name: "copy services file to master"
   template:
-    dest: /etc/wireguard/wg0.conf
-    src: roles/k8s_slave/templates/wg0.conf.j2
-    owner: root
-    group: root
-    mode: '0600'
+    src: steps.txt
+    dest: "/root/"
 
 # Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the slave nodes,
 # because while doing the setup it will create lots of temporary data on RAM

@@ -1,9 +1,9 @@
 [Interface]
-PrivateKey = <CLIENT_PRIVATE_KEY>
-Address = 10.0.0.2/24
+PrivateKey = CLIENT_PRIVATE_KEY
+Address = 10.0.0.x/24
 
 
 [Peer]
-PublicKey = <SERVER_PUBLIC_KEY>
-Endpoint = <SERVER_IP_ADDRESS>:51820
-AllowedIPs = 192.168.1.0/24, 10.0.0.0/24, 172.31.20.0/24, 172.31.12.0/24
+PublicKey = SERVER_PUBLIC_KEY
+Endpoint = SERVER_IP_ADDRESS:51820
+AllowedIPs = 0.0.0.0/0, ::/0

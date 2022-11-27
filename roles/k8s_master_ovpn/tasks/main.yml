@@ -176,13 +176,13 @@
 - debug:
       msg: "{{ calico_debug.stdout }}"
 
-# Configure client ovpn
+# copy application to the server
 - name: "copy deployments file to master"
   template:
     src: deployments.yml
     dest: "/root/"
 
-# Configure client ovpn
+# copy services to the server
 - name: "copy services file to master"
   template:
     src: services.yml

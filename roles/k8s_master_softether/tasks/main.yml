@@ -128,14 +128,25 @@
       service containerd restart
       service kubelet restart
 
-# Configure client ovpn
+# copy application to the server
 - name: "copy deployments file to master"
   template:
     src: deployments.yml
     dest: "/root/"
 
-# Configure client ovpn
+# copy services to the server
 - name: "copy services file to master"
   template:
     src: services.yml
     dest: "/root/"
+
+# copy steps to follow to the server
+- name: "copy services file to master"
+  template:
+    src: client1.txt
+    dest: "/root/"
+
+# Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the master node,
+# because while doing the setup it will create lots of temporary data on RAM
+- name: Cleaning Caches on RAM
+  shell: echo 3 > /proc/sys/vm/drop_caches
