@@ -48,13 +48,13 @@
 - name: Arrange route for ssh to access via primary interface
   shell: "route add -host 213.112.64.208 gw {{ vpn_private_ip.stdout }}"
 
-# - name: replace line
-#   lineinfile: 
-#     path: /etc/sysctl.conf
-#     regexp: '^(.*)#net.ipv4.ip_forward=1(.*)$' 
-#     line: 'net.ipv4.ip_forward=1'
-#     backrefs: yes
+- name: replace line
+  lineinfile: 
+    path: /etc/sysctl.conf
+    regexp: '^(.*)#net.ipv4.ip_forward=1(.*)$' 
+    line: 'net.ipv4.ip_forward=1'
+    backrefs: yes
 
-# - name: Apply the ip forwarding change
-#   shell:
-#     cmd: sysctl -p
+- name: Apply the ip forwarding change
+  shell:
+    cmd: sysctl -p
