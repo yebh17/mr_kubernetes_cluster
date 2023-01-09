@@ -10,7 +10,7 @@
     state: present
   loop: "{{ python_pkgs }}"
 
-# Create Security groups in each region for using it for master and slave nodes later
+# Create Security groups in each region for using it for master and worker nodes later
 - name: Creating Security Group for K8s Cluster
   ec2_group:
     name: "{{ item.sg_name }}"
@@ -34,8 +34,8 @@
       cidr_ip: 0.0.0.0/0
   with_items: "{{ launching_vars }}"
 
-# Launching instances (master and one slave node in one region and the remaining slave nodes in other regions)
-- name: Launching four EC2 instances on AWS
+# Launching instances (master and one worker node in one region and the remaining worker nodes in other regions)
+- name: Launching five EC2 instances on AWS
   ec2:
     key_name: "{{ keypair }}"
     instance_type: "{{ item.instance_flavour }}"
@@ -66,27 +66,33 @@
     hostname: "{{ ec2.results[1].instances[0].public_ip }}"
     groupname: ec2_master
 
-# Adding the second slave node to an host group (ec2_slave)
-- name: Add 2nd instance to host group ec2_slave
+# Adding the second worker node to an host group (ec2_worker)
+- name: Add 2nd instance to host group ec2_worker
   add_host:
     hostname: "{{ ec2.results[2].instances[0].public_ip }}"
-    groupname: ec2_slave
+    groupname: ec2_worker
 
-# Adding the second slave node to an host group (ec2_slave)
-- name: Add 3rd instance to host group ec2_slave
+# Adding the second worker node to an host group (ec2_worker)
+- name: Add 3rd instance to host group ec2_worker
   add_host:
     hostname: "{{ ec2.results[3].instances[0].public_ip }}"
-    groupname: ec2_slave
+    groupname: ec2_worker
 
-# Adding the third slave node to an host group (ec2_slave)
-- name: Add 4th instance to host group ec2_slave
+# Adding the third worker node to an host group (ec2_worker)
+- name: Add 4th instance to host group ec2_worker
   add_host:
     hostname: "{{ ec2.results[4].instances[0].public_ip }}"
-    groupname: ec2_slave
+    groupname: ec2_worker
+
+# Adding the fourth node to an host group (ec2_worker)
+- name: Add 4th instance to host group ec2_worker
+  add_host:
+    hostname: "{{ ec2.results[5].instances[0].public_ip }}"
+    groupname: ec2_test
 
 # Waiting for the ssh to start on all nodes
 - name: Wait for SSH to come up
   wait_for:
-    host: "{{ ec2.results[4].instances[0].public_dns_name }}"
+    host: "{{ ec2.results[5].instances[0].public_dns_name }}"
     port: 22
     state: started

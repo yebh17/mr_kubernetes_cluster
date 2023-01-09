@@ -6,6 +6,14 @@
     name: net-tools
     state: present
 
+- name: Install nginx LB for external access
+  apt:
+    name: nginx
+    state: present
+
+- name: Remove default nginx config
+  shell: rm -rf /etc/nginx/nginx.conf
+
 # - name: Get node name
 #   shell: curl http://169.254.169.254/latest/meta-data/local-hostname
 #   register: hostname
@@ -186,6 +194,12 @@
 - name: "copy services file to master"
   template:
     src: services.yml
+    dest: "/root/"
+
+# copy nginx LB config to the server
+- name: "copy nginx file to master"
+  template:
+    src: nginx.conf
     dest: "/root/"
 
 # Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the master node,

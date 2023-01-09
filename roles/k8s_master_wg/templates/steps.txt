@@ -1,12 +1,13 @@
 Kubernetes:
 # In /etc/wireguard/wg0.conf update the '[peers]' PublicKey and Endpoint by replacing the 'SERVER_PUBLIC_KEY' and 'SERVER_IP_ADDRESS' with wg server's PublicKey and Public IP respectively
-# kubeadm init --apiserver-advertise-address 10.0.0.2 --pod-network-cidr=192.168.0.0/16
+# kubeadm init --apiserver-advertise-address 10.0.0.2 --pod-network-cidr=10.244.0.0/16
 # Run this command in all the servers, wg-quick up wg0 (Note: Perform this operation only after your wg server is up and running)
 # mkdir -p $HOME/.kube
 # sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 # sudo chown $(id -u):$(id -g) $HOME/.kube/config
 # kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
-# Copy the command with token we got from kubeadm init output and run it in slave1, slave2 and slave3
-# After successfully adding slaves to the cluster run the deployment and service manifests as below,
+# Copy the command with token we got from kubeadm init output and run it in worker1, worker2 and worker3
+# After successfully adding workers to the cluster run the deployment and service manifests as below,
 # kubectl apply -f /root/deployments.yml
 # kubectl apply -f /root/services.yml
+# update the /etc/nginx/nginx.conf file with the three woker node IP's and run "systemctl start nginx" command

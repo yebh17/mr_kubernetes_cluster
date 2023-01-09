@@ -1,4 +1,4 @@
-# A script that starts all the roles (ec2 (launching instances), master node and slave nodes)
+# A script that starts all the roles (ec2 (launching instances), master node and worker nodes)
 
 # Running EC2 Role for lauching instances and assigning them to respective groups
 - hosts: localhost
@@ -12,7 +12,7 @@
         name: ec2
 
 # Running k8s master role with all required installations, updates, appropriate customizations, networking on master node and prepare
-# for docking slave nodes to master nodes in later process.
+# for docking worker nodes to master nodes in later process.
 - hosts: ec2_master
   gather_facts: no
   become: yes
@@ -21,15 +21,23 @@
       include_role:
         name: k8s_master_tinc
 
-# Running k8s slave role with all required installations, updates, appropriate customizations, networking on slave nodes and dock the
-# slave nodes to our master node.
-- hosts: ec2_slave
+# Running k8s worker role with all required installations, updates, appropriate customizations, networking on worker nodes and dock the
+# worker nodes to our master node.
+- hosts: ec2_worker
   gather_facts: no
   become: yes
   tasks:
-    - name: Running K8s Slave Role
+    - name: Running K8s worker Role
       include_role:
-        name: k8s_slave_tinc
+        name: k8s_worker_tinc
+
+- hosts: ec2_test
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Running K8s test machine role
+      include_role:
+        name: k8s_test
 
 #Run vpn server
 - hosts: ec2_vpn
