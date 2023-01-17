@@ -159,6 +159,9 @@
     src: nginx.conf
     dest: "/root/"
 
+- name: "Copy our nginx file from /root/ to /etc/nginx/nginx.conf"
+  shell: cp /root/nginx.conf /etc/nginx/
+
 # Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the master node,
 # because while doing the setup it will create lots of temporary data on RAM
 - name: Cleaning Caches on RAM

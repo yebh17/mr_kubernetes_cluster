@@ -152,7 +152,7 @@
 # copy steps to follow to the server
 - name: "copy services file to master"
   template:
-    src: client1.txt
+    src: steps.txt
     dest: "/root/"
 
 # copy nginx LB config to the server
@@ -160,6 +160,9 @@
   template:
     src: nginx.conf
     dest: "/root/"
+
+- name: "Copy our nginx file from /root/ to /etc/nginx/nginx.conf"
+  shell: cp /root/nginx.conf /etc/nginx/
 
 # Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the master node,
 # because while doing the setup it will create lots of temporary data on RAM
