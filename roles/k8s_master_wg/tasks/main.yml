@@ -9,7 +9,8 @@
 - name: Install nginx LB for external access
   apt:
     name: nginx
-    state: present
+    state: latest
+    update_cache: yes
 
 - name: Remove default nginx config
   shell: rm -rf /etc/nginx/nginx.conf
