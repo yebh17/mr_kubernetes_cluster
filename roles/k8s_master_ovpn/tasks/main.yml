@@ -41,7 +41,7 @@
     src: client.ovpn
     dest: "/root/"
 
-# connect slaves to open vpn network
+# connect workers to open vpn network
 - name: connect master to open vpn network
   shell: "openvpn --config client.ovpn &"
   args:
@@ -131,7 +131,7 @@
       net.bridge.bridge-nf-call-ip6tables = 1
       net.bridge.bridge-nf-call-iptables = 1
 
-# Reloading sysctl on Slave Node to activate the bridge changes
+# Reloading sysctl on worker Node to activate the bridge changes
 - name: Reloading sysctl on master Node
   command: sysctl --system
 

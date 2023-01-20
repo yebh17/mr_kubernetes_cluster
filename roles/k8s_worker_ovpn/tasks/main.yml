@@ -1,5 +1,5 @@
 ---
-# tasks file for k8s_slave
+# tasks file for k8s_worker
 
 - name: Install net-tools for network management
   apt:
@@ -49,8 +49,8 @@
     state: present
     filename: 'kubernetes'
 
-# Installing 'docker', 'kubeadm' and 'iproute-tc' on slave node 
-- name: Installing iproute2 & kubeadm on Slave Node
+# Installing 'docker', 'kubeadm' and 'iproute-tc' on worker node
+- name: Installing iproute2 & kubeadm on worker Node
   package:
     name:
       - kubeadm
@@ -69,16 +69,16 @@
 - name: ensure docker and dependencies are installed
   apt: name=docker-ce update_cache=yes
   
-# Starting kubelet services on slave node.
-- name: Staring & enabling Docker & kubelet on Slave Node
+# Starting kubelet services on worker node.
+- name: Staring & enabling Docker & kubelet on worker Node
   service:
     name: kubelet
     state: started
     enabled: yes
 
-# Updating Docker cgroup on slave Node. Reason for using cgroupdriver as 'systemd' instead of default ones, 
+# Updating Docker cgroup on worker Node. Reason for using cgroupdriver as 'systemd' instead of default ones, 
 # https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/
-- name: Updating Docker cgroup on Slave Node
+- name: Updating Docker cgroup on worker Node
   copy:
     dest: /etc/docker/daemon.json
     content: |
@@ -86,26 +86,26 @@
       "exec-opts": ["native.cgroupdriver=systemd"]
       }
 
-# Restart the docker on slave node to get all things activated
-- name: Restart Docker on Slave Node
+# Restart the docker on worker node to get all things activated
+- name: Restart Docker on worker Node
   service:
     name: docker
     state: restarted
 
-# Updating IP tables on Slave Node. Usually in the linux distros like ubuntu,
+# Updating IP tables on worker Node. Usually in the linux distros like ubuntu,
 # (https://www.kevinhooke.com/2018/11/23/checking-iptables-filtering-for-bridge-networking-on-ubuntu-for-kubernetes-setup/)
 # the bridge module in the kernel for "ip6tables, iptables and arptables" has the default set to "1"
 # ("on", i.e. "*do* send the packets to iptables"), but for the distros like Fedora, RHEL, and CentOS they are set to '0' so we need to
 # update the '/etc/sysctl.d/k8s.conf' to set it to '1'
-- name: Updating IP tables on Slave Node
+- name: Updating IP tables on worker Node
   copy:
     dest: /etc/sysctl.d/k8s.conf
     content: |
       net.bridge.bridge-nf-call-ip6tables = 1
       net.bridge.bridge-nf-call-iptables = 1
 
-# Reloading sysctl on Slave Node to activate the bridge changes
-- name: Reloading sysctl on Slave Node
+# Reloading sysctl on worker Node to activate the bridge changes
+- name: Reloading sysctl on worker Node
   command: sysctl --system
 
 - name: Workaround for running kube-api server on ubuntu_21.x and later versions
@@ -116,13 +116,13 @@
       service containerd restart
       service kubelet restart
 
-# connect slaves to open vpn network
-- name: connect slaves to open vpn network
+# connect workers to open vpn network
+- name: connect workers to open vpn network
   shell: "openvpn --config client.ovpn &"
   args:
     chdir: /root/
 
-# Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the slave nodes,
+# Cleaning caches on nodes RAM's. The “shell” module used here to clean the buffer cache on the worker nodes,
 # because while doing the setup it will create lots of temporary data on RAM
 - name: Cleaning Caches on RAM
   shell: echo 3 > /proc/sys/vm/drop_caches

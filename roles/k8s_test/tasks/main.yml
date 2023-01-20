@@ -5,3 +5,6 @@
   template:
       src: curl_req.sh
       dest: "/root/"
+
+- name: Arrange executable permissions to the curl script
+  shell: chmod a+x /root/curl_req.sh

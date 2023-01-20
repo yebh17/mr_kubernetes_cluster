@@ -356,11 +356,11 @@
   tags:
     - getvpnfile_master
 
-- name: "Get client OpenVPN file to slaves"
+- name: "Get client OpenVPN file to workers"
   fetch:
     src: /root/client-configs/files/client.ovpn
-    dest: ./roles/k8s_slave_ovpn/templates/
+    dest: ./roles/k8s_worker_ovpn/templates/
     flat: yes
   tags:
-    - getvpnfile_slaves
+    - getvpnfile_workers
 
