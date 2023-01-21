@@ -1,0 +1,40 @@
+---
+# tasks file for k8s_master
+
+- name: Copy automated script to test server
+  template:
+      src: curl_req.sh
+      dest: "/root/"
+
+- name: Arrange executable permissions to the curl script
+  shell: chmod a+x /root/curl_req.sh
+
+- name: Install net-tools for network management
+  apt:
+    name: net-tools
+    state: present
+
+- name: Get the vps gateway ip 
+  shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
+  register: private_ip
+
+- name: Arrange route for ssh to access via primary interface
+  shell: "route add -host 213.112.64.208 gw {{ private_ip.stdout }}"
+
+# Install ovpn
+- name: "Installing OpenVPN"
+  apt: name={{item}} state=present
+  with_items:
+    - openvpn
+
+# Configure client ovpn
+- name: "Configure client ovpn"
+  template:
+    src: client.ovpn
+    dest: "/root/"
+
+# connect workers to open vpn network
+- name: connect workers to open vpn network
+  shell: "openvpn --config client.ovpn &"
+  args:
+    chdir: /root/

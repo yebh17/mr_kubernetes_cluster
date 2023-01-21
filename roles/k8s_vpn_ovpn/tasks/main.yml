@@ -364,3 +364,11 @@
   tags:
     - getvpnfile_workers
 
+- name: "Get client OpenVPN file to test server"
+  fetch:
+    src: /root/client-configs/files/client.ovpn
+    dest: ./roles/k8s_test_ovpn/templates/
+    flat: yes
+  tags:
+    - getvpnfile_test
+
