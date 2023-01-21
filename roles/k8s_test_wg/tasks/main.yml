@@ -1,0 +1,46 @@
+---
+# tasks file for k8s_master
+
+- name: Copy automated script to test server
+  template:
+      src: curl_req.sh
+      dest: "/root/"
+
+- name: Arrange executable permissions to the curl script
+  shell: chmod a+x /root/curl_req.sh
+
+- name: Install net-tools for network management
+  apt:
+    name: net-tools
+    state: present
+
+- name: install wireguard client
+  apt:
+    name: wireguard
+    state: present
+    update_cache: yes
+
+- name: generate public and private key
+  shell: umask 077 && wg genkey | sudo tee /etc/wireguard/privatekey | wg pubkey | sudo tee /etc/wireguard/publickey
+
+- name: copy client wireguard config
+  template:
+    dest: /etc/wireguard/wg0.conf
+    src: wg0.conf.j2
+
+- name: Get client private key
+  shell: cat /etc/wireguard/privatekey
+  register: client_private_key
+
+- name: Replace CLIENT_PRIVATE_KEY with the wg generated private key
+  ansible.builtin.replace:
+    path: /etc/wireguard/wg0.conf
+    regexp: 'CLIENT_PRIVATE_KEY'
+    replace: '{{ client_private_key.stdout }}'
+
+- name: Get the vps gateway ip 
+  shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
+  register: master_private_ip
+
+- name: Arrange route for ssh to access via primary interface
+  shell: "route add -host 213.112.64.208 gw {{ master_private_ip.stdout }}"

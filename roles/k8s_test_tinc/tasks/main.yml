@@ -1,0 +1,50 @@
+---
+# tasks file for k8s_master
+
+- name: Copy automated script to test server
+  template:
+      src: curl_req.sh
+      dest: "/root/"
+
+- name: Arrange executable permissions to the curl script
+  shell: chmod a+x /root/curl_req.sh
+
+- name: Install net-tools for network management
+  apt:
+    name: net-tools
+    state: present
+
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes
+
+- name: "Installing Tinc"
+  apt: name={{item}} state=present
+  with_items:
+    - tinc
+
+- name: "Create a directory for tinc configurations"
+  shell: mkdir -p /etc/tinc/netname/hosts
+
+- name: "copy tinc.conf file"
+  template:
+    src: tinc.conf
+    dest: "/etc/tinc/netname/"
+
+- name: "Copy hosts config file"
+  template:
+    src: master
+    dest: "/etc/tinc/netname/hosts/"
+
+- name: "copy tinc-up script"
+  template:
+    src: tinc-up
+    dest: "/etc/tinc/netname/"
+
+- name: "copy tinc-down script"
+  template:
+    src: tinc-down
+    dest: "/etc/tinc/netname/"
+
+- name: "Make the tinc scripts executable"
+  shell: chmod 755 /etc/tinc/netname/tinc-*
+

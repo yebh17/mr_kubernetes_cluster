@@ -1,0 +1,37 @@
+---
+# tasks file for k8s_master
+
+- name: Copy automated script to test server
+  template:
+      src: curl_req.sh
+      dest: "/root/"
+
+- name: Arrange executable permissions to the curl script
+  shell: chmod a+x /root/curl_req.sh
+
+- name: Install net-tools for network management
+  apt:
+    name: net-tools
+    state: present
+
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes
+
+- name: Copy the bash script to our nodes, the script downloads and installs ZeroTier App
+  template:
+    src: vpn.sh
+    dest: "/root/"
+
+- name: Make the vpn script executable
+  shell: chmod 755 /root/vpn.sh
+
+- name: Run the vpn script 
+  shell: /root/vpn.sh
+  register: vpn_setup_experimental_server_debug
+- debug:
+      msg: "{{ vpn_setup_experimental_server_debug.stdout }}"
+
+- name: Copy the steps to nodes
+  template:
+    src: steps.txt
+    dest: "/root/"

@@ -1,0 +1,5 @@
+NOTE: Go through the following steps only after ininitially starting your tinc vpn server.
+
+VPN client setup:
+# Generate the keypairs with command, tincd -n netname -K4096
+# Copy /etc/tinc/netname/hosts/experimental-server to vpn server at /etc/tinc/netname/hosts/ destination

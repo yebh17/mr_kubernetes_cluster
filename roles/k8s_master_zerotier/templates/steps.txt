@@ -1,3 +1,7 @@
+VPN setup:
+# Copy the network ID from the https://my.zerotier.com/ and run the following command with the network-id, "zerotier-cli join <network>"
+
+Kubernetes:
 # Copy the command with token we got from kubeadm init output and run it in worker1, worker2 and worker3
 # After successfully adding workers to the cluster run the deployment and service manifests as below,
 # kubectl apply -f /root/deployments.yml

@@ -20,11 +20,10 @@
 - debug:
       msg: "{{ vpn_setup_slave_debug.stdout }}"
 
-- name: Join the machine to the vpn network
-  shell: zerotier-cli join 8bd5124fd64a2f39
-  register: join_node_slave_debug
-- debug:
-      msg: "{{ join_node_slave_debug.stdout }}"
+- name: Copy the steps to nodes
+  template:
+    src: steps.txt
+    dest: "/root/"
 
 # Adding kubernetes repo from base url using gpg keys
 - name: install APT Transport HTTPS

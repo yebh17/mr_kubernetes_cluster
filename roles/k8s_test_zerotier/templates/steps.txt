@@ -1,0 +1,2 @@
+VPN setup:
+# Copy the network ID from the https://my.zerotier.com/ and run the following command with the network-id, "zerotier-cli join <network>"

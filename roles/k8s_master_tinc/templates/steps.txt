@@ -2,7 +2,7 @@ NOTE: Go through the following steps only after ininitially starting your tinc v
 
 VPN:
 # Generate the keypairs with command, tincd -n netname -K4096
-# Copy /etc/tinc/netname/hosts/master to vpn server to /etc/tinc/netname/hosts/ destination
+# Copy /etc/tinc/netname/hosts/master to vpn server at /etc/tinc/netname/hosts/ destination
 
 Kubernetes:
 (NOTE: Go through the following steps only after setting all your vpn clients)
