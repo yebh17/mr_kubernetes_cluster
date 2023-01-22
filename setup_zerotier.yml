@@ -46,4 +46,4 @@
   tasks:
     - name: Running K8s test machine role
       include_role:
-        name: k8s_test
+        name: k8s_test_zerotier
