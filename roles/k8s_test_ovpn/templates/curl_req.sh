@@ -16,7 +16,7 @@ main () {
     rm -rf errors.log
     echo "RESPONSE_CODE | TIME_TOTAL(s) | POD_ID" >> metrics.log
     echo "RESPONSE_CODE | TIME_TOTAL(s) | POD_ID" >> errors.log
-    for i in $(seq 1 20); do
+    for i in $(seq 1 10000); do
         make_request $url
     done
     rm -rf output.log

@@ -45,6 +45,10 @@ UserCreate client4
 ## leave all the full-name, groups, description fields empty
 UserPasswordSet client4
 
+UserCreate client5
+## leave all the full-name, groups, description fields empty
+UserPasswordSet client5
+
 # Setup L2TP/IPSec
 
 IPsecEnable

@@ -8,12 +8,12 @@ cd /usr/local/vpnclient/
 
 # SoftEther uses Virtual Adapters to establish a connection to our VPN server
 
-NicCreate sofether1
+NicCreate softether1
 AccountCreate connection1
 ## give the vpnserver public ip-address and port number (443, 992, 1194, 5555), Note: Instead of an IP Address, you could also enter you server’s fully qualified domain name (FQDN).
 VPN
 client1
-sofether1
+softether1
 AccountPasswordSet connection1
 standard
 AccountConnect connection1
@@ -21,7 +21,7 @@ AccountStatusGet connection1
 
 # Create route to allow traffic via vpn server gateway
 echo 1 > /proc/sys/net/ipv4/ip_forward
-dhclient vpn_sofether1
+dhclient vpn_softether1
 ip route add <vpn-server-public-ip>/32 via 172.31.0.1
 
 ## copy the below items to /etc/sysctl.d/k8s.conf
@@ -31,7 +31,7 @@ net.bridge.bridge-nf-call-iptables = 1
 sysctl --system
 
 # Kubernetes Setup
-kubeadm init --apiserver-advertise-address <vpn_sofether1_ip> --pod-network-cidr=192.168.0.0/16
+kubeadm init --apiserver-advertise-address <vpn_softether1_ip> --pod-network-cidr=192.168.0.0/16
 mkdir -p $HOME/.kube
 cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 chown $(id -u):$(id -g) $HOME/.kube/config

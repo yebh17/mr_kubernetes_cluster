@@ -8,12 +8,12 @@ cd /usr/local/vpnclient/
 
 # SoftEther uses Virtual Adapters to establish a connection to our VPN server
 
-NicCreate sofether2
+NicCreate softether2
 AccountCreate connection2
 ## give the vpnserver public ip-address and port number (443, 992, 1194, 5555), Note: Instead of an IP Address, you could also enter you server’s fully qualified domain name (FQDN).
 VPN
 client2
-sofether2
+softether2
 AccountPasswordSet connection2
 standard
 AccountConnect connection2
@@ -21,7 +21,7 @@ AccountStatusGet connection2
 
 # Create route to allow traffic via vpn server gateway
 echo 1 > /proc/sys/net/ipv4/ip_forward
-dhclient vpn_sofether2
+dhclient vpn_softether2
 ip route add <vpn-server-public-ip>/32 via 172.31.0.1
 
 [client3]
@@ -34,12 +34,12 @@ cd /usr/local/vpnclient/
 
 # SoftEther uses Virtual Adapters to establish a connection to our VPN server
 
-NicCreate sofether3
+NicCreate softether3
 AccountCreate connection3
 ## give the vpnserver public ip-address and port number (443, 992, 1194, 5555), Note: Instead of an IP Address, you could also enter you server’s fully qualified domain name (FQDN).
 VPN
 client3
-sofether3
+softether3
 AccountPasswordSet connection3
 standard
 AccountConnect connection3
@@ -47,7 +47,7 @@ AccountStatusGet connection3
 
 # Create route to allow traffic via vpn server gateway
 echo 1 > /proc/sys/net/ipv4/ip_forward
-dhclient vpn_sofether3
+dhclient vpn_softether3
 ip route add <vpn-server-public-ip>/32 via 172.31.0.1
 
 [client4]
@@ -60,12 +60,12 @@ cd /usr/local/vpnclient/
 
 # SoftEther uses Virtual Adapters to establish a connection to our VPN server
 
-NicCreate sofether4
+NicCreate softether4
 AccountCreate connection4
 ## give the vpnserver public ip-address and port number (443, 992, 1194, 5555), Note: Instead of an IP Address, you could also enter you server’s fully qualified domain name (FQDN).
 VPN
 client4
-sofether4
+softether4
 AccountPasswordSet connection4
 standard
 AccountConnect connection4
@@ -73,5 +73,5 @@ AccountStatusGet connection4
 
 # Create route to allow traffic via vpn server gateway
 echo 1 > /proc/sys/net/ipv4/ip_forward
-dhclient vpn_sofether4
+dhclient vpn_softether4
 ip route add <vpn-server-public-ip>/32 via 172.31.0.1
