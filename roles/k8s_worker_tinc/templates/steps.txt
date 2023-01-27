@@ -1,24 +1,22 @@
 NOTE: Go through the following steps only after ininitially starting your tinc vpn server.
 
-slave1:
-# Change slave to slave1 at /etc/tinc/netname/hosts/ and update with, Subnet = 10.0.0.3/32
-# Update /etc/tinc/netname/tinc-up in slave1 with, ifconfig $INTERFACE 10.0.0.3 netmask 255.255.255.0
-# Update 'node-name' in /etc/tinc/netname/tinc.conf with slave1
+worker1:
+# Change workers to worker1 at /etc/tinc/netname/hosts/ and update with, Subnet = 10.0.0.3/32
+# Update /etc/tinc/netname/tinc-up in worker1 with, ifconfig $INTERFACE 10.0.0.3 netmask 255.255.255.0
+# Update 'node-name' in /etc/tinc/netname/tinc.conf with worker1
 # Generate the keypairs with command, tincd -n netname -K4096
-# Copy /etc/tinc/netname/hosts/slave1 to vpn server to /etc/tinc/netname/hosts/ destination
+# Copy /etc/tinc/netname/hosts/worker1 to vpn server to /etc/tinc/netname/hosts/worker1 destination
 
-# slave2:
-# Change slave to slave2 at /etc/tinc/netname/hosts/ and update with, Subnet = 10.0.0.4/32
-# Update /etc/tinc/netname/tinc-up in slave2 with, ifconfig $INTERFACE 10.0.0.4 netmask 255.255.255.0
-# Update 'node-name' in /etc/tinc/netname/tinc.conf with slave2
+# worker2:
+# Change workers to worker2 at /etc/tinc/netname/hosts/ and update with, Subnet = 10.0.0.4/32
+# Update /etc/tinc/netname/tinc-up in worker2 with, ifconfig $INTERFACE 10.0.0.4 netmask 255.255.255.0
+# Update 'node-name' in /etc/tinc/netname/tinc.conf with worker2
 # Generate the keypairs with command, tincd -n netname -K4096
-# Copy /etc/tinc/netname/hosts/slave2 to vpn server to /etc/tinc/netname/hosts/ destination
+# Copy /etc/tinc/netname/hosts/worker2 to vpn server to /etc/tinc/netname/hosts/worker2 destination
 
-# slave3:
-# Change slave to slave3 at /etc/tinc/netname/hosts/ and update with, Subnet = 10.0.0.5/32
-# Update /etc/tinc/netname/tinc-up in slave3 with, ifconfig $INTERFACE 10.0.0.5 netmask 255.255.255.0
-# Update 'node-name' in /etc/tinc/netname/tinc.conf with slave3
+# worker3:
+# Change workers to worker3 at /etc/tinc/netname/hosts/ and update with, Subnet = 10.0.0.5/32
+# Update /etc/tinc/netname/tinc-up in worker3 with, ifconfig $INTERFACE 10.0.0.5 netmask 255.255.255.0
+# Update 'node-name' in /etc/tinc/netname/tinc.conf with worker3
 # Generate the keypairs with command, tincd -n netname -K4096
-# Copy /etc/tinc/netname/hosts/slave3 to vpn server to /etc/tinc/netname/hosts/ destination
-
-# Now go through the 'kubernetes' section steps provided in 'roles/k8s_master_tinc/templates/steps.txt'
+# Copy /etc/tinc/netname/hosts/worker3 to vpn server to /etc/tinc/netname/hosts/worker3 destination

@@ -32,7 +32,7 @@
 
 - name: "Copy hosts config file"
   template:
-    src: master
+    src: experimental
     dest: "/etc/tinc/netname/hosts/"
 
 - name: "copy tinc-up script"

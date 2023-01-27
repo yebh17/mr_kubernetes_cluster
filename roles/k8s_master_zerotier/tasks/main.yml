@@ -133,47 +133,9 @@
       service containerd restart
       service kubelet restart
 
-- name: Get ZeroTier tunnel ip
-  shell: ip -4 -o a | cut -d ' ' -f 2,7 | cut -d '/' -f 1 | grep '^zt' | cut -d " " -f2
-  register: tunnel_ip
-
-# Initialize kubernetes cluster with a pod network so that the Pods can talk to each other, also ignoring errors like 'NumCPU', 'Mem'
-# and 'FileContent--proc-sys-net-bridge-bridge-nf-call-iptables' as they are limited to system resources.
-- name: initialize the cluster
-  shell: "kubeadm init --apiserver-advertise-address {{ tunnel_ip.stdout }} --pod-network-cidr=192.168.0.0/16"
-  args:
-    chdir: $HOME
-  register: token_log
-- debug:
-      msg: "{{ token_log.stdout }}"
-
-# Setting kubectl on master node with updating kubernetes configuration from default path to '$HOME/.kube/config' path and updating
-# ownership permissions to user and group.
-- name: create a directory for kube configs
-  shell: mkdir -p $HOME/.kube
-
-- name: copy config file to new directory
-  shell: cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-
-- name: Set permissions for the file
-  shell: chown $(id -u):$(id -g) $HOME/.kube/config
-
 # Only required this if the user is root
 # - name: export admin config
 #   shell: export KUBECONFIG=/etc/kubernetes/admin.conf
-
-- name: Pause for 1 minute to run calico
-  ansible.builtin.pause:
-    minutes: 1
-
-# Deploying a CNI plugin on master node, we use 'calico' for it, https://projectcalico.docs.tigera.io/about/about-calico
-- name: install Pod network
-  shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
-  args:
-    chdir: $HOME
-  register: calico_debug
-- debug:
-      msg: "{{ calico_debug.stdout }}"
 
 # Configure client ovpn
 - name: "copy deployments file to master"

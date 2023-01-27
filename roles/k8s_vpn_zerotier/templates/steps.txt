@@ -1,0 +1,4 @@
+# Open the https://my.zerotier.com/ and login with your credentials or create one if its your first time.
+# Click on the 'Create a Network' icon
+# click on the network that we just got created
+# select Public for the Access control option.

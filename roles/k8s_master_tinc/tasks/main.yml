@@ -126,7 +126,7 @@
       net.bridge.bridge-nf-call-ip6tables = 1
       net.bridge.bridge-nf-call-iptables = 1
 
-# Reloading sysctl on Slave Node to activate the bridge changes
+# Reloading sysctl on worker Node to activate the bridge changes
 - name: Reloading sysctl on master Node
   command: sysctl --system
 
@@ -138,10 +138,10 @@
       service containerd restart
       service kubelet restart
 
-# A token creation command for slave nodes. This command is used to get the token for the slave node to join the cluster.
+# A token creation command for worker nodes. This command is used to get the token for the worker node to join the cluster.
 # Using “register” the output of the “command” module is stored in a variable called “token”.
-# Now this token variable contain the command that we need to run on slave node, so that it joins the master node.
-# - name: Creating token for Slave
+# Now this token variable contain the command that we need to run on worker node, so that it joins the master node.
+# - name: Creating token for worker
 #   command: kubeadm token create  --print-join-command
 #   register: token
 

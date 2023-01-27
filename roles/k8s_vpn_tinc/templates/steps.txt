@@ -1,5 +1,6 @@
 # Generate the keypairs with command, tincd -n netname -K4096
 # copy /etc/tinc/netname/hosts/externalnyc to /etc/tinc/netname/hosts/externalnyc on master server
-# copy /etc/tinc/netname/hosts/externalnyc to /etc/tinc/netname/hosts/externalnyc on slave1 server
-# copy /etc/tinc/netname/hosts/externalnyc to /etc/tinc/netname/hosts/externalnyc on slave2 server
-# copy /etc/tinc/netname/hosts/externalnyc to /etc/tinc/netname/hosts/externalnyc on slave3 server
+# copy /etc/tinc/netname/hosts/externalnyc to /etc/tinc/netname/hosts/externalnyc on worker1 server
+# copy /etc/tinc/netname/hosts/externalnyc to /etc/tinc/netname/hosts/externalnyc on worker2 server
+# copy /etc/tinc/netname/hosts/externalnyc to /etc/tinc/netname/hosts/externalnyc on worker3 server
+# copy /etc/tinc/netname/hosts/externalnyc to /etc/tinc/netname/hosts/externalnyc on experimental-server
