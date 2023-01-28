@@ -3,8 +3,10 @@ Address = 10.0.0.1/24
 SaveConfig = true
 ListenPort = 51820
 PrivateKey = SERVER_PRIVATE_KEY
-PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o iface -j MASQUERADE
-PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o iface -j MASQUERADE
+PostUp = ufw route allow in on wg0 out on iface
+PostUp = iptables -t nat -I POSTROUTING -o iface -j MASQUERADE
+PreDown = ufw route delete allow in on wg0 out on iface
+PreDown = iptables -t nat -D POSTROUTING -o iface -j MASQUERADE
 
 [Peer]
 PublicKey = CLIENT1_PUBLIC_KEY
@@ -21,3 +23,7 @@ AllowedIPs = 10.0.0.4/32
 [Peer]
 PublicKey = CLIENT4_PUBLIC_KEY
 AllowedIPs = 10.0.0.5/32
+
+[Peer]
+PublicKey = CLIENT5_PUBLIC_KEY
+AllowedIPs = 10.0.0.6/32
