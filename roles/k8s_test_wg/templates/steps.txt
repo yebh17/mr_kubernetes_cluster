@@ -1,3 +1,1 @@
-VPN setup:
-# In /etc/wireguard/wg0.conf update the '[peers]' PublicKey and Endpoint by replacing the 'SERVER_PUBLIC_KEY' and 'SERVER_IP_ADDRESS' with wg server's PublicKey and Public IP respectively
-# Run this command in all the servers, wg-quick up wg0 (Note: Perform this operation only after your wg server is up and running)
+# Run, /root/curl_req.sh http://<nginx-server-public-ip>:30008 

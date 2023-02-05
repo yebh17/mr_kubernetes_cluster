@@ -14,33 +14,8 @@
     name: net-tools
     state: present
 
-- name: install wireguard client
-  apt:
-    name: wireguard
-    state: present
-    update_cache: yes
-
-- name: generate public and private key
-  shell: umask 077 && wg genkey | sudo tee /etc/wireguard/privatekey | wg pubkey | sudo tee /etc/wireguard/publickey
-
-- name: copy client wireguard config
+# copy steps to follow to the server
+- name: "copy steps file to test server"
   template:
-    dest: /etc/wireguard/wg0.conf
-    src: wg0.conf.j2
-
-- name: Get client private key
-  shell: cat /etc/wireguard/privatekey
-  register: client_private_key
-
-- name: Replace CLIENT_PRIVATE_KEY with the wg generated private key
-  ansible.builtin.replace:
-    path: /etc/wireguard/wg0.conf
-    regexp: 'CLIENT_PRIVATE_KEY'
-    replace: '{{ client_private_key.stdout }}'
-
-- name: Get the vps gateway ip 
-  shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
-  register: master_private_ip
-
-- name: Arrange route for ssh to access via primary interface
-  shell: "route add -host 213.112.64.208 gw {{ master_private_ip.stdout }}"
+    src: steps.txt
+    dest: "/root/"

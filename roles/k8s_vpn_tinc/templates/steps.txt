@@ -4,3 +4,4 @@
 # copy /etc/tinc/netname/hosts/externalnyc to /etc/tinc/netname/hosts/externalnyc on worker2 server
 # copy /etc/tinc/netname/hosts/externalnyc to /etc/tinc/netname/hosts/externalnyc on worker3 server
 # copy /etc/tinc/netname/hosts/externalnyc to /etc/tinc/netname/hosts/externalnyc on experimental-server
+# Start the tinc vpn server with, tincd -n netname -D -d3 &

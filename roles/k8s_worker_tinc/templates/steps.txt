@@ -20,3 +20,5 @@ worker1:
 # Update 'node-name' in /etc/tinc/netname/tinc.conf with worker3
 # Generate the keypairs with command, tincd -n netname -K4096
 # Copy /etc/tinc/netname/hosts/worker3 to vpn server to /etc/tinc/netname/hosts/worker3 destination
+
+# Run "tincd -n netname -D -d3 &" in all the workers to connect to vpn network

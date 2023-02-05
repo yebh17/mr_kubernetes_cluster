@@ -96,8 +96,14 @@
     state: started
     enabled: yes
 
+- name: Create Docker directory
+  file:
+    path: /etc/docker
+    state: directory
+
 # Updating Docker cgroup on Master Node. Reason for using cgroupdriver as 'systemd' instead of default ones, 
 # https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/
+
 - name: Updating Docker cgroup on Master Node
   copy:
     dest: /etc/docker/daemon.json
@@ -105,6 +111,7 @@
       {
       "exec-opts": ["native.cgroupdriver=systemd"]
       }
+
 # Restart the docker on Master node to get all things activated
 - name: Restart docker on Master Node
   service:

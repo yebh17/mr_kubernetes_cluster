@@ -14,27 +14,8 @@
     name: net-tools
     state: present
 
-- name: Get the vps gateway ip 
-  shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
-  register: private_ip
-
-- name: Arrange route for ssh to access via primary interface
-  shell: "route add -host 213.112.64.208 gw {{ private_ip.stdout }}"
-
-# Install ovpn
-- name: "Installing OpenVPN"
-  apt: name={{item}} state=present
-  with_items:
-    - openvpn
-
-# Configure client ovpn
-- name: "Configure client ovpn"
+# copy steps to follow to the server
+- name: "copy steps file to test server"
   template:
-    src: client.ovpn
+    src: steps.txt
     dest: "/root/"
-
-# connect workers to open vpn network
-- name: connect workers to open vpn network
-  shell: "openvpn --config client.ovpn &"
-  args:
-    chdir: /root/

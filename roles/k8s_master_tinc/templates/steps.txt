@@ -6,7 +6,7 @@ VPN:
 
 Kubernetes:
 (NOTE: Go through the following steps only after setting all your vpn clients)
-# Run this command in all the servers, sudo tincd -n netname -D -d3 &
+# Run this command to connect to vpn network, sudo tincd -n netname -D -d3 &
 # kubeadm init --apiserver-advertise-address 10.0.0.2 --pod-network-cidr=192.168.0.0/16
 # mkdir -p $HOME/.kube
 # sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config

@@ -14,51 +14,8 @@
     name: net-tools
     state: present
 
-- name: Get the vps gateway ip 
-  shell: "route -n | grep 'UG[ \t]' | awk '{print $2}'"
-  register: private_ip
-
-- name: Arrange route for ssh to access via primary interface
-  shell: "route add -host 213.112.64.208 gw {{ private_ip.stdout }}"
-
-- name: Update apt-get repo and cache
-  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
-
-- name: Download softether from internet
-  shell: wget https://github.com/SoftEtherVPN/SoftEtherVPN_Stable/releases/download/v4.38-9760-rtm/softether-vpnclient-v4.38-9760-rtm-2021.08.17-linux-x64-64bit.tar.gz
-  args:
-    chdir: $HOME
-
-- name: Untar the softether vpnclient
-  shell: tar xzvf softether-vpnclient-v4.38-9760-rtm-2021.08.17-linux-x64-64bit.tar.gz
-  args:
-    chdir: $HOME
-
-- name: Download build-essentials packages
-  shell: apt-get install build-essential -y
-
-- name: build the softether vpn client
-  shell: make
-  args:
-    chdir: $HOME/vpnclient
-
-- name: Run vpnclient from anywhere
-  shell: mv vpnclient/ /usr/local/
-  args:
-    chdir: $HOME
-
-- name: Set limited permissions to vpnclient and related utilities
-  shell: chmod 600 * && chmod 700 vpnclient && chmod 700 vpncmd
-  args:
-    chdir: /usr/local/vpnclient/
-
-- name: Start the vpnclient
-  shell: ./vpnclient start
-  args:
-    chdir: /usr/local/vpnclient/
-
 # copy steps to follow to the server
-- name: "copy services file to master"
+- name: "copy steps file to test server"
   template:
-    src: client_5.txt
+    src: steps.txt
     dest: "/root/"
