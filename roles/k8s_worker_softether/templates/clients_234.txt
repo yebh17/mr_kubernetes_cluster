@@ -7,7 +7,6 @@ cd /usr/local/vpnclient/
 ## press enter to take the hostname a localhost
 
 # SoftEther uses Virtual Adapters to establish a connection to our VPN server
-
 NicCreate softether2
 AccountCreate connection2
 ## give the vpnserver public ip-address and port number (443, 992, 1194, 5555), Note: Instead of an IP Address, you could also enter you server’s fully qualified domain name (FQDN).
@@ -18,6 +17,8 @@ AccountPasswordSet connection2
 standard
 AccountConnect connection2
 AccountStatusGet connection2
+
+# Press ctrl-c to exit the softether config template
 
 # Create route to allow traffic via vpn server gateway
 echo 1 > /proc/sys/net/ipv4/ip_forward
@@ -33,7 +34,6 @@ cd /usr/local/vpnclient/
 ## press enter to take the hostname a localhost
 
 # SoftEther uses Virtual Adapters to establish a connection to our VPN server
-
 NicCreate softether3
 AccountCreate connection3
 ## give the vpnserver public ip-address and port number (443, 992, 1194, 5555), Note: Instead of an IP Address, you could also enter you server’s fully qualified domain name (FQDN).
@@ -44,6 +44,8 @@ AccountPasswordSet connection3
 standard
 AccountConnect connection3
 AccountStatusGet connection3
+
+# Press ctrl-c to exit the softether config template
 
 # Create route to allow traffic via vpn server gateway
 echo 1 > /proc/sys/net/ipv4/ip_forward
@@ -59,7 +61,6 @@ cd /usr/local/vpnclient/
 ## press enter to take the hostname a localhost
 
 # SoftEther uses Virtual Adapters to establish a connection to our VPN server
-
 NicCreate softether4
 AccountCreate connection4
 ## give the vpnserver public ip-address and port number (443, 992, 1194, 5555), Note: Instead of an IP Address, you could also enter you server’s fully qualified domain name (FQDN).
@@ -70,6 +71,8 @@ AccountPasswordSet connection4
 standard
 AccountConnect connection4
 AccountStatusGet connection4
+
+# Press ctrl-c to exit the softether config template
 
 # Create route to allow traffic via vpn server gateway
 echo 1 > /proc/sys/net/ipv4/ip_forward

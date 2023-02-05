@@ -4,7 +4,6 @@
 ## update the CLIENT2_PUBLIC_KEY with your client2 public key
 ## update the CLIENT3_PUBLIC_KEY with your client3 public key
 ## update the CLIENT4_PUBLIC_KEY with your client4 public key
-## update the CLIENT5_PUBLIC_KEY with your client5 public key
 
 # Now enable the wg server to run as a service with running the command, systemctl enable wg-quick@wg0.service
 # Now start the service with, systemctl start wg-quick@wg0.service

@@ -21,9 +21,9 @@ HubCreate VPN
 ## enter some password to your VPN hub
 Hub VPN
 
-# Enable SecureNAT
+## Enabling Secure NAT
 ## There are two ways of connecting your hubs to the server network: using a Local Bridge connection or using the SecureNAT function.
-### Here we use SecureNAT, SecureNAT is a combination of Virtual NAT and DHCP Server function
+## Here we use SecureNAT, SecureNAT is a combination of Virtual NAT and DHCP Server function
 
 SecureNatEnable
 
@@ -45,12 +45,7 @@ UserCreate client4
 ## leave all the full-name, groups, description fields empty
 UserPasswordSet client4
 
-UserCreate client5
-## leave all the full-name, groups, description fields empty
-UserPasswordSet client5
-
 # Setup L2TP/IPSec
-
 IPsecEnable
 ## Enable L2TP over IPsec Server Function: Choose yes to enable L2TP VPN over IPSec with pre-shared key encryption.
 ## Enable Raw L2TP Server Function: This will enable L2TP VPN for clients with no IPSec encryption.

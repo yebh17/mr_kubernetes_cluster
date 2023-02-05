@@ -12,4 +12,5 @@ Kubernetes:
 # After successfully adding workers to the cluster run the deployment and service manifests as below,
 # kubectl apply -f /root/deployments.yml
 # kubectl apply -f /root/services.yml
-# update the /etc/nginx/nginx.conf file with the three woker node IP's and run "systemctl start nginx" command
+# Run the following command to expose the application using an nginx server
+systemctl start nginx
