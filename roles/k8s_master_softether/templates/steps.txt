@@ -36,7 +36,7 @@ kubeadm init --apiserver-advertise-address <vpn_softether1_ip> --pod-network-cid
 mkdir -p $HOME/.kube
 cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 chown $(id -u):$(id -g) $HOME/.kube/config
-kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/calico.yaml
 # Copy the command with token we got from kubeadm init output and run it in worker1, worker2 and worker3
 # After successfully adding workers to the cluster run the deployment and service manifests as below,
 kubectl apply -f /root/deployments.yml

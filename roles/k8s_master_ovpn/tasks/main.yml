@@ -183,7 +183,7 @@
 
 # Deploying a CNI plugin on master node, we use 'calico' for it, https://projectcalico.docs.tigera.io/about/about-calico
 - name: install Pod network
-  shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+  shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/calico.yaml
   args:
     chdir: $HOME
   register: calico_debug
