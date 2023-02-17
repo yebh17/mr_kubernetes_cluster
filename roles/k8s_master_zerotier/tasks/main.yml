@@ -19,18 +19,7 @@
   apt: update_cache=yes force_apt_get=yes
 
 - name: Copy the bash script to our nodes, the script downloads and installs ZeroTier App
-  template:
-    src: vpn.sh
-    dest: "/root/"
-
-- name: Make the vpn script executable
-  shell: chmod 755 /root/vpn.sh
-
-- name: Run the vpn script 
-  shell: /root/vpn.sh
-  register: vpn_setup_master_debug
-- debug:
-      msg: "{{ vpn_setup_master_debug.stdout }}"
+  shell: curl -s https://install.zerotier.com | sudo bash
 
 - name: Copy the steps to nodes
   template:
