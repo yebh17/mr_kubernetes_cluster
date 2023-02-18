@@ -1,16 +1,16 @@
 #!/bin/bash
 
 print_header () {
-    echo "code,time_total"
+    echo "HTTP_STATUS,RESPONSE_TIME"
 }
 
 cleanup_logs () {
-    echo "REMOVING METRICS LOG FILE"
+    echo "Removing metrics log file..."
     rm -f metrics.log
-    echo "REMOVING ERRORS LOG FILE"
+    echo "Removing errors log file..."
     rm -f errors.log
-    echo "RESPONSE_CODE | TIME_TOTAL(s) | POD_ID" >> metrics.log
-    echo "RESPONSE_CODE | TIME_TOTAL(s) | POD_ID" >> errors.log
+    echo "HTTP_STATUS | RESPONSE_TIME(s) | POD_ID" >> metrics.log
+    echo "HTTP_STATUS | RESPONSE_TIME(s) | POD_ID" >> errors.log
 }
 
 make_request () {
@@ -40,11 +40,14 @@ main () {
     print_header
     cleanup_logs
 
+    echo "Making requests to $url..."
     for i in $(seq 1 10000); do
         make_request $url
     done
 
+    echo "Cleaning up temporary files..."
     cleanup_temp_files
+    echo "Done!"
 }
 
 main "$@"
